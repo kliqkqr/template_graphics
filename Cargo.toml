@@ -1,5 +1,5 @@
 [package]
-name = "template_graphics"
+name = "tg"
 version = "0.1.0"
 authors = ["kliqkqr <paul.prietzel@gmail.com>"]
 edition = "2018"
