@@ -25,7 +25,7 @@ use crate::prim::d3::{
 
 pub struct Tri {
     normal          : Vect<f32>,
-    vertices        : [Vect<f32>; 3],
+    vertices        : (Vect<f32>, Vect<f32>, Vect<f32>),
     attr_byte_count : u16 
 }
 
@@ -35,8 +35,20 @@ pub struct Stl {
 }
 
 impl Tri {
-    pub fn new(normal : Vect<f32>, vertices : [Vect<f32>; 3], attr_byte_count : u16) -> Tri {
+    pub fn new(normal : Vect<f32>, vertices : (Vect<f32>, Vect<f32>, Vect<f32>), attr_byte_count : u16) -> Tri {
         Tri{normal : normal, vertices : vertices, attr_byte_count : attr_byte_count}
+    }
+
+    pub fn normal(&self) -> Vect<f32> {
+        self.normal
+    }
+
+    pub fn vertices(&self) -> (Vect<f32>, Vect<f32>, Vect<f32>) {
+        self.vertices 
+    }
+
+    pub fn attr_byte_count(&self) -> u16 {
+        self.attr_byte_count
     }
 }
 
@@ -86,11 +98,11 @@ impl Stl {
 
             let normal = Stl::read_vect_from_bytes(bytes)?;
 
-            let vertices = [
+            let vertices = (
                 Stl::read_vect_from_bytes(bytes[12..].as_ref())?,
                 Stl::read_vect_from_bytes(bytes[24..].as_ref())?,
                 Stl::read_vect_from_bytes(bytes[36..].as_ref())?
-            ];
+            );
 
             let attr_byte_count = bytes[48..].as_ref().read_u16::<LittleEndian>()?;
 
@@ -100,5 +112,13 @@ impl Stl {
 
         let stl = Stl::new(head_bytes, triangles);
         Ok(stl)
+    }
+
+    pub fn head(&self) -> &Vec<u8> {
+        &self.head
+    }
+
+    pub fn triangles(&self) -> &Vec<Tri> {
+        &self.triangles
     }
 }
