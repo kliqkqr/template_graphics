@@ -15,27 +15,27 @@ use std::ops::{
 
 /// 2D vector
 pub struct Vect<A> (
-    A,
-    A
+    pub A,
+    pub A
 );
 
 /// 2D line defined by 2 points
 pub struct PLine<A> (
-    Vect<A>,
-    Vect<A>
+    pub Vect<A>,
+    pub Vect<A>
 );
 
 /// 2D line defined by 1 point and 1 vector
 pub struct VLine<A> {
-    pos : Vect<A>,  // position  point
-    dir : Vect<A>   // direction vector
+    pub pos : Vect<A>,  // position  point
+    pub dir : Vect<A>   // direction vector
 }
 
 /// 2D Triangle defined by 3 points
 pub struct PTri<A> (
-    Vect<A>,
-    Vect<A>,
-    Vect<A>
+    pub Vect<A>,
+    pub Vect<A>,
+    pub Vect<A>
 );
 
 impl<A> Vect<A> {
@@ -53,14 +53,6 @@ impl<A> PLine<A> {
 impl<A> VLine<A> {
     pub fn new(pos : Vect<A>, dir : Vect<A>) -> VLine<A> {
         VLine{pos : pos, dir : dir}
-    }
-
-    pub fn pos(&self) -> &Vect<A> {
-        &self.pos
-    }
-
-    pub fn dir(&self) -> &Vect<A> {
-        &self.dir
     }
 }
 

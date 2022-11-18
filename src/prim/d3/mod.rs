@@ -16,28 +16,28 @@ use std::ops::{
 
 // 3D vector
 pub struct Vect<A> (
-    A,
-    A,
-    A
+    pub A,
+    pub A,
+    pub A
 );
 
 // 3D line defined by 2 points
 pub struct PLine<A> (
-    Vect<A>,
-    Vect<A>
+    pub Vect<A>,
+    pub Vect<A>
 );
 
 // 3D line defined by 1 point and 1 vector
 pub struct VLine<A> {
-    pos : Vect<A>,  // position  point
-    dir : Vect<A>   // direction vector
+    pub pos : Vect<A>,  // position  point
+    pub dir : Vect<A>   // direction vector
 }
 
 // 3D Triangle defined by 3 points
 pub struct PTri<A> (
-    Vect<A>,
-    Vect<A>,
-    Vect<A>
+    pub Vect<A>,
+    pub Vect<A>,
+    pub Vect<A>
 );
 
 impl<A> Vect<A> {
