@@ -10,91 +10,121 @@ use std::ops::{
     Add,
     Sub,
     Mul,
-    Div
+    Div,
+    Neg
+};
+
+use crate::util::num::{
+    Num
 };
 
 /// 2D vector
-pub struct Vect<A> (
+pub struct Vect<A : Num> (
     pub A,
     pub A
 );
 
 /// 2D line defined by 2 points
-pub struct PLine<A> (
+pub struct PLine<A : Num> (
     pub Vect<A>,
     pub Vect<A>
 );
 
 /// 2D line defined by 1 point and 1 vector
-pub struct VLine<A> {
+pub struct VLine<A : Num> {
     pub pos : Vect<A>,  // position  point
     pub dir : Vect<A>   // direction vector
 }
 
 /// 2D Triangle defined by 3 points
-pub struct PTri<A> (
+pub struct PTri<A : Num> (
     pub Vect<A>,
     pub Vect<A>,
     pub Vect<A>
 );
 
-impl<A> Vect<A> {
+/// 2D Rectangle defined by 2 points and a left orthogonal distance
+pub struct DPRect<A : Num> {
+    pub pnts : (Vect<A>, Vect<A>),
+    pub dist : A  
+}
+
+impl<A : Num> Vect<A> {
     pub fn new(x : A, y : A) -> Vect<A> {
         Vect(x, y)
     }
+
+    pub fn ortho_left(&self) -> Vect<A> {
+        Vect::new(-self.1, self.0)
+    }
 }
 
-impl<A> PLine<A> {
+impl<A : Num> PLine<A> {
     pub fn new(a : Vect<A>, b : Vect<A>) -> PLine<A> {
         PLine(a, b)
     }
 }
 
-impl<A> VLine<A> {
+impl<A : Num> VLine<A> {
     pub fn new(pos : Vect<A>, dir : Vect<A>) -> VLine<A> {
         VLine{pos : pos, dir : dir}
     }
 }
 
-impl<A> PTri<A> {
+impl<A : Num> PTri<A> {
     pub fn new(a : Vect<A>, b : Vect<A>, c : Vect<A>) -> PTri<A> {
         PTri(a, b, c)
     }
 }
 
-impl<A : Clone> Clone for Vect<A> {
+impl<A : Num> DPRect<A> {
+    pub fn new(a : Vect<A>, b : Vect<A>, dist : A) -> DPRect<A> {
+        DPRect{pnts : (a, b), dist : dist}
+    }
+
+    pub fn contour(&self) -> [Vect<A>; 4] {
+        let (a, b) = self.pnts;
+        let ortho_ab = (b - a).ortho_left();
+        let c = a + ortho_ab;
+        let d = b + ortho_ab;
+
+        [a, b, c, d]
+    }
+}
+
+impl<A : Num> Clone for Vect<A> {
     fn clone(&self) -> Vect<A> {
-        Vect::new(self.0.clone(), self.1.clone())
+        Vect::new(self.0, self.1)
     }
 }
 
-impl<A : Clone> Clone for PLine<A> {
+impl<A : Num> Clone for PLine<A> {
     fn clone(&self) -> PLine<A> {
-        PLine::new(self.0.clone(), self.1.clone())
+        PLine::new(self.0, self.1)
     }
 }
 
-impl<A : Clone> Clone for VLine<A> {
+impl<A : Num> Clone for VLine<A> {
     fn clone(&self) -> VLine<A> {
-        VLine::new(self.pos.clone(), self.dir.clone())
+        VLine::new(self.pos, self.dir)
     }
 }
 
-impl<A : Clone> Clone for PTri<A> {
+impl<A : Num> Clone for PTri<A> {
     fn clone(&self) -> PTri<A> {
-        PTri::new(self.0.clone(), self.1.clone(), self.2.clone())
+        PTri::new(self.0, self.1, self.2)
     }
 }
 
-impl<A : Copy> Copy for Vect<A> {}
+impl<A : Num + Copy> Copy for Vect<A> {}
 
-impl<A : Copy> Copy for PLine<A> {}
+impl<A : Num + Copy> Copy for PLine<A> {}
 
-impl<A : Copy> Copy for VLine<A> {}
+impl<A : Num + Copy> Copy for VLine<A> {}
 
-impl<A : Copy> Copy for PTri<A> {}
+impl<A : Num + Copy> Copy for PTri<A> {}
 
-impl<A : Add<Output = A>> Add for Vect<A> {
+impl<A : Num> Add for Vect<A> {
     type Output = Vect<A>;
 
     fn add(self, other : Self) -> Vect<A> {
@@ -102,7 +132,7 @@ impl<A : Add<Output = A>> Add for Vect<A> {
     }
 }
 
-impl<A : Sub<Output = A>> Sub for Vect<A> {
+impl<A : Num> Sub for Vect<A> {
     type Output = Vect<A>;
 
     fn sub(self, other : Self) -> Vect<A> {
@@ -110,7 +140,7 @@ impl<A : Sub<Output = A>> Sub for Vect<A> {
     }
 }
 
-impl<A : Mul<Output = A>> Mul for Vect<A> {
+impl<A : Num> Mul for Vect<A> {
     type Output = Vect<A>;
 
     fn mul(self, other : Self) -> Vect<A> {
@@ -118,7 +148,7 @@ impl<A : Mul<Output = A>> Mul for Vect<A> {
     }
 }
 
-impl<A : Mul<Output = A> + Clone> Mul<A> for Vect<A> {
+impl<A : Num> Mul<A> for Vect<A> {
     type Output = Vect<A>;
 
     fn mul(self, other : A) -> Vect<A> {
@@ -126,7 +156,7 @@ impl<A : Mul<Output = A> + Clone> Mul<A> for Vect<A> {
     }
 }
 
-impl<A : Div<Output = A>> Div for Vect<A> {
+impl<A : Num> Div for Vect<A> {
     type Output = Vect<A>;
 
     fn div(self, other : Self) -> Vect<A> {
@@ -134,7 +164,7 @@ impl<A : Div<Output = A>> Div for Vect<A> {
     }
 }
 
-impl<A : Div<Output = A> + Clone> Div<A> for Vect<A> {
+impl<A : Num> Div<A> for Vect<A> {
     type Output = Vect<A>;
 
     fn div(self, other : A) -> Vect<A> {
