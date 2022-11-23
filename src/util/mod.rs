@@ -1,2 +1,2 @@
-/// module for number trait
+/// module for number operations
 pub mod num;
