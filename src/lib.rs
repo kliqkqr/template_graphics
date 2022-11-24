@@ -4,7 +4,7 @@
 pub mod draw;
 /// module for file functionality
 pub mod file;
-/// module for primitives like vector, line, triangle, ..
-pub mod prim;
+/// module for geometry
+pub mod geom;
 /// module for utility functionality
 pub mod util;
