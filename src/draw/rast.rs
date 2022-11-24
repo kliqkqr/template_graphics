@@ -3,7 +3,7 @@ use image::{
     RgbImage
 };
 
-use crate::geom::prim::d2::{
+use crate::geom::d2::prim::{
     Vect,
     TRect,
     Rectangle

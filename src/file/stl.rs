@@ -19,7 +19,7 @@ use byteorder::{
     LittleEndian, ReadBytesExt
 };
 
-use crate::geom::prim::d3::{
+use crate::geom::d3::prim::{
     Vect
 };
 

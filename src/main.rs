@@ -1,7 +1,7 @@
 use image::*;
 
-use tg::geom::prim::d2::*;
 use tg::draw::rast::*;
+use tg::geom::d2::prim::*;
 
 fn main() {
     let mut image = RgbImage::new(1000, 1000);
@@ -12,14 +12,6 @@ fn main() {
     let s = PSeg::new(a, b);
     let r = 8f32;
     let rect = SRect::new(s, r);
-
-    let pnts = rect.points();
-
-    println!("dir: {}", rect.seg.dir().to_string());
-
-    for p in pnts {
-        println!("{}", p.to_string())
-    }
 
     let color = Rgb::from([255u8, 0u8, 0u8]);
 
