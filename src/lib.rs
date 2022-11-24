@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-/// module for easy performant conversions
+/// module for conversions
 pub mod conv;
 
 /// module for drawing functionality
