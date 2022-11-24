@@ -15,7 +15,6 @@ use crate::ops::{
     HAdd,
     HSub,
     HMul,
-    HDiv,
     HNeg
 };
 
