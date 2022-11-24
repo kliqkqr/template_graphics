@@ -1,7 +1,3 @@
-use std::convert::{
-    Into
-};
-
 use image::{
     Rgb,
     RgbImage

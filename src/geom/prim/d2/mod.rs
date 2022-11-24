@@ -11,7 +11,6 @@ use std::clone::{
 };
 
 use std::convert::{
-    AsRef,
     From
 };
 
@@ -36,7 +35,6 @@ use crate::ops::{
     HSub,
     HMul,
     HDiv,
-    HRem,
     HNeg
 };
 
@@ -45,7 +43,6 @@ use crate::conv::{
 };
 
 use crate::range::{
-    Range,
     IRange,
     irange
 };
@@ -497,14 +494,6 @@ pub trait Rectangle<A> {
 // ----------------------------------------------------------------------------------------------------------------------------------------
 //   STD TRAIT IMPLEMENTATIONS 
 // ----------------------------------------------------------------------------------------------------------------------------------------
-
-// AsRef
-
-impl<A> AsRef<OVTri<A>> for TRect<A> {
-    fn as_ref(&self) -> &OVTri<A> {
-        &self.tri
-    }
-}
 
 // Clone
 
