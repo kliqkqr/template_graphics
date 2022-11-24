@@ -30,6 +30,15 @@ use std::option::{
     Option
 };
 
+use crate::conv::{
+    Easy
+};
+
+use crate::num::{
+    Zero,
+    One
+};
+
 use crate::ops::{
     HAdd,
     HSub,
@@ -38,18 +47,9 @@ use crate::ops::{
     HNeg
 };
 
-use crate::conv::{
-    Easy
-};
-
 use crate::range::{
     IRange,
     irange
-};
-
-use crate::num::{
-    Zero,
-    One
 };
 
 use crate::rel::{
