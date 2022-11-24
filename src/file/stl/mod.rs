@@ -40,11 +40,11 @@ impl Tri {
     }
 
     pub fn normal(&self) -> Vect<f32> {
-        self.normal
+        self.normal.clone()
     }
 
     pub fn vertices(&self) -> (Vect<f32>, Vect<f32>, Vect<f32>) {
-        self.vertices 
+        self.vertices.clone()
     }
 
     pub fn attr_byte_count(&self) -> u16 {
