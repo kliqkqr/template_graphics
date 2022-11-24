@@ -443,38 +443,6 @@ pub trait Rectangle<A> {
           B        : Borrow<OVTri<A>>,
           &'a Self : Easy<B> 
     {
-        // let seg = self.base_seg::<PSeg<A>>();
-        // let rat = self.base_rat();
-
-        // let [a, b] = seg.points();
-        // let ab = seg.dir();
-        // let c = b + ab.orth_l() * rat;
-        // let ac = c - a.clone();
-        // let ap = pnt.clone() - a;
-
-        // let ap_dot_ab = ap.dot(&ab);
-        // let ap_dot_ac = ap.dot(&ac);
-
-        // A::zero() < ap_dot_ab && ap_dot_ab < ab.dot(&ab) && A::zero() < ap_dot_ac && ap_dot_ac < ac.dot(&ac)
-
-        // let [a, b, c, d] = self.points();
-
-        // let [a, b, c] = self.triangle::<VTri<A>>().points();
-
-        // let ab = b - a.clone();
-        // let ad = d - a.clone();
-        // let am = pnt.clone() - a;
-
-        // let ab = seg.
-
-        // let am_dot_ab = am.dot(&ab);
-        // let am_dot_ad = am.dot(&ad);
-
-        // let left  = A::zero() <= am_dot_ab && am_dot_ab <= ab.dot(&ab);
-        // let right = A::zero() <= am_dot_ad && am_dot_ad <= ad.dot(&ad);
-
-        // left && right
-
         let ovtri = self.easy();
 
         let a = ovtri.borrow().pos();
