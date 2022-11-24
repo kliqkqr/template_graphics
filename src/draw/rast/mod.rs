@@ -13,7 +13,7 @@ use crate::geom::prim::d2::{
     Rectangle
 };
 
-use crate::util::iter::{
+use crate::range::{
     range
 };
 

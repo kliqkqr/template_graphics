@@ -31,7 +31,7 @@ use std::option::{
     Option
 };
 
-use crate::util::arith::{
+use crate::ops::{
     HAdd,
     HSub,
     HMul,
@@ -40,22 +40,22 @@ use crate::util::arith::{
     HNeg
 };
 
-use crate::util::conv::{
+use crate::conv::{
     Easy
 };
 
-use crate::util::iter::{
+use crate::range::{
     Range,
     IRange,
     irange
 };
 
-use crate::util::num::{
+use crate::num::{
     Zero,
     One
 };
 
-use crate::util::rel::{
+use crate::rel::{
     POrd,
     ExtHPOrd
 };
