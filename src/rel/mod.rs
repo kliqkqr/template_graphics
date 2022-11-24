@@ -1,5 +1,5 @@
 use std::cmp::{
-    PartialEq
+    PartialOrd
 };
 
 pub trait POrd<Rhs = Self> : PartialOrd<Rhs> {}
