@@ -33,11 +33,6 @@ use crate::ops::{
     HNeg 
 };
 
-use crate::range::{
-    IRange,
-    irange
-};
-
 use crate::rel::{
     POrd
 };
