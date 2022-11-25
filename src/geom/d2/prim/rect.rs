@@ -65,6 +65,13 @@ pub struct TRect<A> {
     tri : OVTri<A>,   
 }
 
+/// 2D bounding rectangle alligned to x and y axis defined by 2 points "start" "end" where start = min(start, end) and end = max(start, end)
+#[derive(Debug)]
+pub struct BRect<A> {
+    start : Vect<A>,
+    end   : Vect<A>
+}
+
 //  IMPLS ---------------------------------------------------------------------------------------------------------------------------------
 
 impl<A, B : Segment<A>> SRect<A, B> {
@@ -103,6 +110,71 @@ impl<A> TRect<A> {
     }
 }
 
+impl<A> BRect<A> {
+    pub fn new(a : Vect<A>, b : Vect<A>) -> BRect<A> 
+    where A : Clone + POrd
+    {
+        let start = a.min(&b);
+        let end = a.max(&b);
+
+        BRect::new_unchecked(start, end)
+    }
+
+    pub fn with_zero(a : Vect<A>) -> BRect<A> 
+    where A : Clone + POrd + Zero
+    {
+        let start = a.min(&Vect::zero());
+        let end = a.max(&Vect::zero());
+
+        BRect::new_unchecked(start, end)
+    }
+
+    pub fn start_zero_unchecked(end : Vect<A>) -> BRect<A> 
+    where A : Zero
+    {
+        BRect::new_unchecked(Vect::zero(), end)
+    }
+
+    pub fn new_unchecked(start : Vect<A>, end : Vect<A>) -> BRect<A> {
+        BRect{start : start, end : end}
+    }
+
+    pub fn start(&self) -> Vect<A> 
+    where A : Clone 
+    {
+        self.start.clone()
+    }
+
+    pub fn end(&self) -> Vect<A> 
+    where A : Clone
+    {
+        self.end.clone()
+    }
+
+    pub fn clamp<B : Borrow<BRect<A>>>(&self, other : B) -> BRect<A> 
+    where A : Clone + POrd
+    {
+        let s_s = self.start();
+        let s_e = self.end();
+        let o_s = other.borrow().start();
+        let o_e = other.borrow().end();
+
+        let start = o_s.max(&s_s).min(&s_e);
+        let end   = o_e.max(&s_s).min(&s_e);
+
+        BRect::new_unchecked(start, end)
+    }
+
+    pub fn map<B : Fn(&Vect<A>) -> Vect<C>, C>(&self, func : B) -> BRect<C> 
+    where A : Clone, C : Clone + POrd
+    {
+        let start = func(&self.start());
+        let end   = func(&self.end());
+
+        BRect::new(start, end)
+    }
+}
+
 //  TRAITS --------------------------------------------------------------------------------------------------------------------------------
 
 pub trait Rectangle<A> {
@@ -129,10 +201,10 @@ pub trait Rectangle<A> {
     }
 
     /// x- / y-axis alligned bounding box of rectangle
-    fn bounds(&self) -> IRange<Vect<A>> 
-    where A : Clone + POrd 
+    fn bounds(&self) -> BRect<A> 
+    where A : Clone + POrd
     {
-        irange(self.min(), self.max())
+        BRect::new_unchecked(self.min(), self.max())
     }
 
     /// checks if rectangle contains points
@@ -210,5 +282,31 @@ impl<A : Clone + HAdd> Rectangle<A> for TRect<A> {
 
     fn span(&self) -> (Vect<A>, (Vect<A>, Vect<A>)) {
         (self.pos(), self.dirs())
+    }
+}
+
+impl<A : Clone + HAdd + HSub + Zero> Rectangle<A> for BRect<A> {
+    fn points(&self) -> [Vect<A>; 4] {
+        let a = self.start();
+        let c = self.end();
+
+        let ac = &c - &a;
+
+        let b = Vect::new(a.0.clone() + ac.0, a.0.clone());
+        let d = Vect::new(a.0.clone(), a.1.clone() + ac.1);
+
+        [a, b, c, d]
+    }
+
+    fn span(&self) -> (Vect<A>, (Vect<A>, Vect<A>)) {
+        let a = self.start();
+        let c = self.end();
+
+        let ac = &c - &a;
+
+        let ab = Vect::new(ac.0, A::zero());
+        let ad = Vect::new(A::zero(), ac.1);
+
+        (a, (ab, ad))
     }
 }
