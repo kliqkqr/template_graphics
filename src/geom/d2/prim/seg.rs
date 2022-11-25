@@ -90,6 +90,22 @@ pub trait Segment<A> {
         point_1 - point_0
     }
 
+    /// add vector to both points of line segment
+    fn add(&self, vect : &Vect<A>) -> PSeg<A>
+    where A : Clone + HAdd
+    {
+        let [a, b] = self.points();
+        PSeg::new(&a + vect, &b + vect)
+    }
+
+    /// sub vector from both points of line segment
+    fn sub(&self, vect : &Vect<A>) -> PSeg<A>
+    where A : Clone + HSub
+    {
+        let [a, b] = self.points();
+        PSeg::new(&a - vect, &b - vect)
+    }
+
     /// optional intersection between to line segments a + r * b with
     ///
     /// a + r * b = c + s * d
@@ -146,4 +162,3 @@ impl<A : Clone + HAdd + HSub> Segment<A> for VSeg<A> {
         self.dir.clone()
     }
 }
-
