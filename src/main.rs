@@ -10,15 +10,6 @@ fn main() {
     let blue = Rgb::from([0, 0, 255u8]);
     let green = Rgb::from([0, 255u8, 0]);
 
-    // let a = Vect::new(450f32, 100f32);
-    // let b = Vect::new(550f32, 100f32);
-
-    // let s = PSeg::new(a, b);
-    // let r = 8f32;
-    // let rect = SRect::new(s, r);
-
-    // fill_rect(&mut image, &rect, color);
-
     let seg = PSeg::new(Vect::new(200f32, 200f32), Vect::new(800f32, 600f32));
 
     draw_seg(&mut image, &seg, red, 10f32);
