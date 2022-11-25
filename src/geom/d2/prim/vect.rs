@@ -8,14 +8,15 @@ use std::ops::{
 
 use crate::num::{
     Zero,
-    One
+    One,
+    Float
 };
 
 use crate::ops::{
     HAdd,
     HSub,
     HMul,
-    HNeg
+    HNeg,
 };
 
 use crate::rel::{
@@ -61,6 +62,12 @@ impl<A> Vect<A> {
         let y = func(&self.1); 
 
         Vect::new(x, y)
+    }
+
+    pub fn len(&self) -> A
+    where A : Clone + HAdd + HMul + Float
+    {
+        (self.0.clone() * self.0.clone() + self.1.clone() + self.1.clone()).sqrt()
     }
 
     /// determinant of two vectors a b : (a0 * b1 - a1 * b0) 
@@ -153,6 +160,14 @@ impl<A : Add<Output = A> + Clone> Add<A> for Vect<A> {
     }
 }
 
+impl<'a, 'b, A : Clone + Add<Output = A>> Add<&'b Vect<A>> for &'a Vect<A> {
+    type Output = Vect<A>;
+
+    fn add(self, other : &'b Vect<A>) -> Vect<A> {
+        Vect::new(self.0.clone() + other.0.clone(), self.1.clone() + other.1.clone())
+    }
+}
+
 impl<A : Sub<Output = A>> Sub for Vect<A> {
     type Output = Vect<A>;
 
@@ -166,6 +181,14 @@ impl<A : Sub<Output = A> + Clone> Sub<A> for Vect<A> {
 
     fn sub(self, other : A) -> Vect<A> {
         Vect::new(self.0 - other.clone(), self.1 - other)
+    }
+}
+
+impl<'a, 'b, A : Clone + Sub<Output = A>> Sub<&'b Vect<A>> for &'a Vect<A> {
+    type Output = Vect<A>;
+
+    fn sub(self, other : &'b Vect<A>) -> Vect<A> {
+        Vect::new(self.0.clone() - other.0.clone(), self.1.clone() - other.1.clone())
     }
 }
 
