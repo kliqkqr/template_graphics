@@ -24,22 +24,33 @@ use crate::rel::{
 
 //  TYPES ---------------------------------------------------------------------------------------------------------------------------------
 
-/// 2D line segment defined by 2 points "0" "1"
+/// 2D line segment defined by 2 points "a" "b" with direction vector b - a
 #[derive(Debug)]
-pub struct PSeg<A>(pub Vect<A>, pub Vect<A>);
+pub struct PSeg<A> {
+    a : Vect<A>,
+    b : Vect<A>
+}
 
 /// 2D line segment defined by 1 position vector "pos" and 1 direction vector "dir"
 #[derive(Debug)]
 pub struct VSeg<A> {
-    pub pos : Vect<A>,
-    pub dir : Vect<A>
+    pos : Vect<A>,
+    dir : Vect<A>
 }
 
 //  IMPLS ---------------------------------------------------------------------------------------------------------------------------------
 
 impl<A> PSeg<A> {
     pub fn new(a : Vect<A>, b : Vect<A>) -> PSeg<A> {
-        PSeg(a, b)
+        PSeg{a : a, b : b}
+    }
+
+    pub fn a(&self) -> &Vect<A> {
+        &self.a
+    }
+
+    pub fn b(&self) -> &Vect<A> {
+        &self.b
     }
 }
 
@@ -47,11 +58,19 @@ impl<A> VSeg<A> {
     pub fn new(pos : Vect<A>, dir : Vect<A>) -> VSeg<A> {
         VSeg{pos : pos, dir : dir}
     }
+
+    pub fn pos(&self) -> &Vect<A> {
+        &self.pos 
+    }    
+
+    pub fn dir(&self) -> &Vect<A> {
+        &self.dir
+    }
 }
 
 impl<A : Clone> Clone for PSeg<A> {
     fn clone(&self) -> PSeg<A> {
-        PSeg::new(self.0.clone(), self.1.clone())
+        PSeg::new(self.a().clone(), self.b().clone())
     }
 }
 
@@ -115,15 +134,15 @@ pub trait Segment<A> {
     where A : Clone + One + Zero + HAdd + HSub + HMul + HDiv + POrd 
     {
         let a = self.pos();
-        let b = self.dir();
+        let ab = self.dir();
         let c = other.pos();
-        let d = other.dir();
+        let cd = other.dir();
 
-        let div = d.lin_dep_det(&b, eps)?;
-        let r = d.det(&c) + a.det(&d) / div;
+        let div = cd.lin_dep_det(&ab, eps)?;
+        let r = cd.det(&c) + a.det(&cd) / div;
 
         match A::zero() <= r && r <= A::one() {
-            true  => Some(a + b * r),
+            true  => Some(a + ab * r),
             false => None
         }
     }
@@ -138,7 +157,7 @@ impl<A : Clone> Segment<A> for PSeg<A> {
     }
 
     fn points(&self) -> [Vect<A>; 2] {
-        [self.0.clone(), self.1.clone()]
+        [self.a().clone(), self.b().clone()]
     }
 }
 

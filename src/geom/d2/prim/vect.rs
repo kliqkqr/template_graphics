@@ -6,6 +6,10 @@ use std::ops::{
     Neg
 };
 
+use crate::conv::{
+    To
+};
+
 use crate::num::{
     Zero,
     One,
@@ -64,10 +68,18 @@ impl<A> Vect<A> {
         Vect::new(x, y)
     }
 
+    /// length of float vector
     pub fn len(&self) -> A
     where A : Clone + HAdd + HMul + Float
+    {   
+        (self.0.clone() * self.0.clone() + self.1.clone() * self.1.clone()).sqrt()
+    }
+
+    /// length of vector converting values to some float
+    pub fn len_as<B>(&self) -> B 
+    where A : Clone + HAdd + HMul + To<B>, B : Float
     {
-        (self.0.clone() * self.0.clone() + self.1.clone() + self.1.clone()).sqrt()
+        (self.0.clone() * self.0.clone() + self.1.clone() * self.1.clone()).to().sqrt()
     }
 
     /// determinant of two vectors a b : (a0 * b1 - a1 * b0) 
@@ -104,12 +116,14 @@ impl<A> Vect<A> {
         Vect::new(x, y)
     }  
 
+    /// rotate vector 90°
     pub fn orth_l(&self) -> Vect<A> 
     where A : Clone + HNeg
     {
         Vect::new(-self.1.clone(), self.0.clone())
     }
 
+    /// rotate vector 270°
     pub fn orth_r(&self) -> Vect<A> 
     where A : Clone + HNeg
     {

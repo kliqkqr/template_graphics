@@ -35,7 +35,7 @@ use crate::rel::{
 /// 2D line defined by 1 line segment "seg"
 #[derive(Debug)]
 pub struct SLine<A, B : Segment<A>> {
-    pub seg : B,
+    seg     : B,
     _phant  : PhantomData<A>
 }
 
@@ -46,13 +46,13 @@ pub trait Line<A> : Segment<A> {
     where A : Clone + One + Zero + HAdd + HSub + HMul + HDiv + POrd 
     {
         let a = self.pos();
-        let b = self.dir();
+        let ab = self.dir();
         let c = other.pos();
-        let d = other.dir();
+        let cd = other.dir();
 
-        let div = d.lin_dep_det(&b, eps)?;
-        let r = d.det(&c) + a.det(&d) / div;
+        let div = cd.lin_dep_det(&ab, eps)?;
+        let r = cd.det(&c) + a.det(&cd) / div;
 
-        Some(a + b * r)
+        Some(a + ab * r)
     }
 }

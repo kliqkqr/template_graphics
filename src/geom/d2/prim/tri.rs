@@ -21,15 +21,19 @@ use crate::ops::{
 
 //  TYPES ---------------------------------------------------------------------------------------------------------------------------------
 
-/// 2D triangle defined by 3 points "0" "1" "2"
+/// 2D triangle defined by 3 points "a" "b" "c"
 #[derive(Debug)]
-pub struct PTri<A>(pub Vect<A>, pub Vect<A>, pub Vect<A>);
+pub struct PTri<A> {
+    a : Vect<A>,
+    b : Vect<A>,
+    c : Vect<A>
+}
 
 /// 2D triangle defined by 1 position vector "pos" and 2 direction vectors "dir.0" "dir.1"
 #[derive(Debug)]
 pub struct VTri<A> {
-    pub pos : Vect<A>,
-    pub dir : (Vect<A>, Vect<A>)
+    pos : Vect<A>,
+    dir : (Vect<A>, Vect<A>),
 }
 
 /// 2D triangle defined by 1 position vector and 2 direction vectors where direction vectors are orthogonal
@@ -41,14 +45,42 @@ pub struct OVTri<A> {
 //  IMPLS ---------------------------------------------------------------------------------------------------------------------------------
 
 impl<A> PTri<A> {
-    fn new(a : Vect<A>, b : Vect<A>, c : Vect<A>) -> PTri<A> {
-        PTri(a, b, c)
+    pub fn new(a : Vect<A>, b : Vect<A>, c : Vect<A>) -> PTri<A> {
+        PTri{a : a, b : b, c : c}
+    }
+
+    pub fn a(&self) -> &Vect<A> {
+        &self.a
+    }
+
+    pub fn b(&self) -> &Vect<A> {
+        &self.b
+    }
+
+    pub fn c(&self) -> &Vect<A> {
+        &self.c
     }
 }
 
 impl<A> VTri<A> {
-    fn new(pos : Vect<A>, dir0 : Vect<A>, dir1 : Vect<A>) -> VTri<A> {
+    pub fn new(pos : Vect<A>, dir0 : Vect<A>, dir1 : Vect<A>) -> VTri<A> {
         VTri{pos : pos, dir : (dir0, dir1)}
+    }
+
+    pub fn pos(&self) -> &Vect<A> {
+        &self.pos
+    }
+
+    pub fn dir0(&self) -> &Vect<A> {
+        &self.dir.0
+    }
+
+    pub fn dir1(&self) -> &Vect<A> {
+        &self.dir.1
+    }
+
+    pub fn dir(&self) -> &(Vect<A>, Vect<A>) {
+        &self.dir
     }
 }
 
@@ -57,28 +89,20 @@ impl<A> OVTri<A> {
         OVTri{tri : tri}
     }
 
-    pub fn pos(&self) -> Vect<A> 
-    where A : Clone
-    {
-        self.tri.pos.clone()
+    pub fn pos(&self) -> &Vect<A> {
+        &self.tri.pos
     }
 
-    pub fn dir0(&self) -> Vect<A> 
-    where A : Clone
-    {
-        self.tri.dir.0.clone()
+    pub fn dir0(&self) -> &Vect<A> {
+        &self.tri.dir.0
     }
 
-    pub fn dir1(&self) -> Vect<A> 
-    where A : Clone
-    {
-        self.tri.dir.1.clone()
+    pub fn dir1(&self) -> &Vect<A> {
+        &self.tri.dir.1
     }
 
-    pub fn dirs(&self) -> (Vect<A>, Vect<A>) 
-    where A : Clone
-    {
-        self.tri.dir.clone()
+    pub fn dirs(&self) -> &(Vect<A>, Vect<A>) {
+        &self.tri.dir
     }
 }
 
@@ -101,7 +125,7 @@ impl<A, B : Rectangle<A>> From<&B> for OVTri<A> {
 
 impl<A : Clone + HSub> Triangle<A> for PTri<A> {
     fn points(&self) -> [Vect<A>; 3] {
-        [self.0.clone(), self.1.clone(), self.2.clone()]
+        [self.a().clone(), self.b().clone(), self.c().clone()]
     }
 }
 

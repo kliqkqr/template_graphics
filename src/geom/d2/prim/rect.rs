@@ -46,8 +46,8 @@ use crate::rel::{
 /// a = seg.points()\[0\]; b = seg.points()\[1\]; c = b + rat * rotate(90°, b - a); d = a + rat * rotate(90°, b - a);
 #[derive(Debug)]
 pub struct SRect<A, B : Segment<A>> {
-    pub seg : B,
-    pub rat : A
+    seg : B,
+    rat : A
 }
 
 /// 2D rectangle defined by triangle with 1 position vector "pos()" and 2 direction vectors "dirs()" where direction vectors are orthogonal
@@ -71,7 +71,17 @@ pub struct BRect<A> {
 
 impl<A, B : Segment<A>> SRect<A, B> {
     pub fn new(seg : B, rat : A) -> SRect<A, B> {
-        SRect{seg : seg, rat : rat}
+        SRect{seg, rat}
+    }
+
+    pub fn seg(&self) -> &B {
+        &self.seg
+    }
+
+    pub fn rat(&self) -> A 
+    where A : Clone 
+    {
+        self.rat.clone()
     }
 }
 
@@ -80,25 +90,25 @@ impl<A> TRect<A> {
         TRect{tri : ovtri}
     }
 
-    pub fn pos(&self) -> Vect<A> 
+    pub fn pos(&self) -> &Vect<A> 
     where A : Clone
     {
         self.tri.pos()
     }
 
-    pub fn dirs(&self) -> (Vect<A>, Vect<A>) 
+    pub fn dirs(&self) -> &(Vect<A>, Vect<A>) 
     where A : Clone
     {
         self.tri.dirs()
     }
 
-    pub fn dir0(&self) -> Vect<A>
+    pub fn dir0(&self) -> &Vect<A>
     where A : Clone 
     {
         self.tri.dir0()
     }
 
-    pub fn dir1(&self) -> Vect<A>
+    pub fn dir1(&self) -> &Vect<A>
     where A : Clone 
     {
         self.tri.dir1()
@@ -134,16 +144,12 @@ impl<A> BRect<A> {
         BRect{start : start, end : end}
     }
 
-    pub fn start(&self) -> Vect<A> 
-    where A : Clone 
-    {
-        self.start.clone()
+    pub fn start(&self) -> &Vect<A> {
+        &self.start
     }
 
-    pub fn end(&self) -> Vect<A> 
-    where A : Clone
-    {
-        self.end.clone()
+    pub fn end(&self) -> &Vect<A> {
+        &self.end
     }
 
     pub fn clamp<B : Borrow<BRect<A>>>(&self, other : B) -> BRect<A> 
@@ -213,7 +219,7 @@ pub trait Rectangle<A> {
         let ovtri = self.easy();
 
         let a = ovtri.borrow().pos();
-        let ap = pnt.clone() - a;
+        let ap = pnt - &a;
         let (ab, ac) = ovtri.borrow().dirs();
 
         let ap_dot_ab = ap.dot(&ab);
@@ -267,23 +273,23 @@ impl<A : Clone + HAdd> Rectangle<A> for TRect<A> {
     fn points(&self) -> [Vect<A>; 4] {
         let (ab, ad) = self.dirs();
 
-        let a = self.pos();
-        let b = a.clone() + ab;
-        let c = b.clone() + ad.clone();
-        let d = a.clone() + ad;
+        let a = self.pos().clone();
+        let b = &a + ab;
+        let c = &b + ad;
+        let d = &a + &ad;
 
         [a, b, c, d]
     }
 
     fn span(&self) -> (Vect<A>, (Vect<A>, Vect<A>)) {
-        (self.pos(), self.dirs())
+        (self.pos().clone(), self.dirs().clone())
     }
 }
 
 impl<A : Clone + HAdd + HSub + Zero> Rectangle<A> for BRect<A> {
     fn points(&self) -> [Vect<A>; 4] {
-        let a = self.start();
-        let c = self.end();
+        let a = self.start().clone();
+        let c = self.end().clone();
 
         let ac = &c - &a;
 
@@ -294,8 +300,8 @@ impl<A : Clone + HAdd + HSub + Zero> Rectangle<A> for BRect<A> {
     }
 
     fn span(&self) -> (Vect<A>, (Vect<A>, Vect<A>)) {
-        let a = self.start();
-        let c = self.end();
+        let a = self.start().clone();
+        let c = self.end().clone();
 
         let ac = &c - &a;
 
