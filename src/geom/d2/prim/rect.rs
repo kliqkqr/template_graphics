@@ -219,7 +219,7 @@ pub trait Rectangle<A> {
         let ovtri = self.easy();
 
         let a = ovtri.borrow().pos();
-        let ap = pnt - &a;
+        let ap = pnt - a;
         let (ab, ac) = ovtri.borrow().dirs();
 
         let ap_dot_ab = ap.dot(&ab);
@@ -249,13 +249,13 @@ impl<'a, A> Easy<&'a OVTri<A>> for &'a TRect<A> {
 
 impl<A : Clone + HAdd + HSub + HMul + HNeg, B : Segment<A>> Rectangle<A> for SRect<A, B> {
     fn points(&self) -> [Vect<A>; 4] {
-        let dir = self.seg.dir();
         let [a, b] = self.seg.points();
 
-        let v = dir.orth_l() * self.rat.clone();
+        let ab = self.seg.dir();
+        let ad = ab.orth_l() * self.rat();
 
-        let c = b.clone() + v.clone();
-        let d = a.clone() + v;
+        let c = &b + &ad;
+        let d = &a + &ad;
         
         [a, b, c, d]
     }
@@ -263,7 +263,7 @@ impl<A : Clone + HAdd + HSub + HMul + HNeg, B : Segment<A>> Rectangle<A> for SRe
     fn span(&self) -> (Vect<A>, (Vect<A>, Vect<A>)) {
         let pos  = self.seg.pos();
         let dir0 = self.seg.dir();
-        let dir1 = self.seg.dir().orth_l() * self.rat.clone();
+        let dir1 = self.seg.dir().orth_l() * self.rat();
 
        (pos, (dir0, dir1))
     }
@@ -276,7 +276,7 @@ impl<A : Clone + HAdd> Rectangle<A> for TRect<A> {
         let a = self.pos().clone();
         let b = &a + ab;
         let c = &b + ad;
-        let d = &a + &ad;
+        let d = &a + ad;
 
         [a, b, c, d]
     }

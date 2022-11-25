@@ -168,7 +168,7 @@ impl<A : Clone + HAdd + HSub> Segment<A> for VSeg<A> {
 
     fn points(&self) -> [Vect<A>; 2] {
         let a = self.pos.clone();
-        let b = a.clone() + self.dir.clone();
+        let b = &a + self.dir();
 
         [a, b]
     }

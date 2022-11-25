@@ -152,11 +152,15 @@ impl<A> Vect<A> {
 
 //  TRAIT IMPLS ---------------------------------------------------------------------------------------------------------------------------
 
+// Clone
+
 impl<A : Clone> Clone for Vect<A> {
     fn clone(&self) -> Self {
         Vect::new(self.0.clone(), self.1.clone())
     }
 }
+
+// Add
 
 impl<A : Add<Output = A>> Add for Vect<A> {
     type Output = Vect<A>;
@@ -182,6 +186,16 @@ impl<'a, 'b, A : Clone + Add<Output = A>> Add<&'b Vect<A>> for &'a Vect<A> {
     }
 }
 
+impl<'a, A : Clone + Add<Output = A>> Add<A> for &'a Vect<A> {
+    type Output = Vect<A>;
+
+    fn add(self, a : A) -> Vect<A> {
+        Vect::new(self.0.clone() + a.clone(), self.1.clone() + a)
+    }
+}
+
+// Sub
+
 impl<A : Sub<Output = A>> Sub for Vect<A> {
     type Output = Vect<A>;
 
@@ -206,6 +220,16 @@ impl<'a, 'b, A : Clone + Sub<Output = A>> Sub<&'b Vect<A>> for &'a Vect<A> {
     }
 }
 
+impl<'a, A : Clone + Sub<Output = A>> Sub<A> for &'a Vect<A> {
+    type Output = Vect<A>;
+
+    fn sub(self, a : A) -> Vect<A> {
+        Vect::new(self.0.clone() - a.clone(), self.1.clone() - a)      
+    }
+}
+
+// Mul
+
 impl<A : Mul<Output = A>> Mul for Vect<A> {
     type Output = Vect<A>;
 
@@ -221,6 +245,24 @@ impl<A : Mul<Output = A> + Clone> Mul<A> for Vect<A> {
         Vect::new(self.0 * other.clone(), self.1 * other)
     }
 }
+
+impl<'a, 'b, A : Clone + Mul<Output = A>> Mul<&'b Vect<A>> for &'a Vect<A> {
+    type Output = Vect<A>;
+
+    fn mul(self, other : &'b Vect<A>) -> Vect<A> {
+        Vect::new(self.0.clone() * other.0.clone(), self.1.clone() * other.1.clone())
+    }
+}
+
+impl<'a, A : Clone + Mul<Output = A>> Mul<A> for &'a Vect<A> {
+    type Output = Vect<A>;
+
+    fn mul(self, a : A) -> Vect<A> {
+        Vect::new(self.0.clone() * a.clone(), self.1.clone() * a)      
+    }
+}
+
+// Div
 
 impl<A : Div<Output = A>> Div for Vect<A> {
     type Output = Vect<A>;
@@ -238,10 +280,36 @@ impl<A : Div<Output = A> + Clone> Div<A> for Vect<A> {
     }
 }
 
+impl<'a, 'b, A : Clone + Div<Output = A>> Div<&'b Vect<A>> for &'a Vect<A> {
+    type Output = Vect<A>;
+
+    fn div(self, other : &'b Vect<A>) -> Vect<A> {
+        Vect::new(self.0.clone() / other.0.clone(), self.1.clone() / other.1.clone())
+    }
+}
+
+impl<'a, A : Clone + Div<Output = A>> Div<A> for &'a Vect<A> {
+    type Output = Vect<A>;
+
+    fn div(self, a : A) -> Vect<A> {
+        Vect::new(self.0.clone() / a.clone(), self.1.clone() / a)      
+    }
+}
+
+// Neg
+
 impl<A : Neg<Output = A>> Neg for Vect<A> {
     type Output = Vect<A>;
 
     fn neg(self) -> Vect<A> {
         Vect::new(-self.0, -self.1)
+    }
+}
+
+impl<'a, A : Clone + Neg<Output = A>> Neg for &'a Vect<A> {
+    type Output = Vect<A>;
+
+    fn neg(self) -> Vect<A> {
+        Vect::new(-self.0.clone(), -self.1.clone())
     }
 }

@@ -29,11 +29,11 @@ pub struct PTri<A> {
     c : Vect<A>
 }
 
-/// 2D triangle defined by 1 position vector "pos" and 2 direction vectors "dir.0" "dir.1"
+/// 2D triangle defined by 1 position vector "pos" and 2 direction vectors "dirs.0" "dirs.1"
 #[derive(Debug)]
 pub struct VTri<A> {
-    pos : Vect<A>,
-    dir : (Vect<A>, Vect<A>),
+    pos  : Vect<A>,
+    dirs : (Vect<A>, Vect<A>),
 }
 
 /// 2D triangle defined by 1 position vector and 2 direction vectors where direction vectors are orthogonal
@@ -64,7 +64,7 @@ impl<A> PTri<A> {
 
 impl<A> VTri<A> {
     pub fn new(pos : Vect<A>, dir0 : Vect<A>, dir1 : Vect<A>) -> VTri<A> {
-        VTri{pos : pos, dir : (dir0, dir1)}
+        VTri{pos : pos, dirs : (dir0, dir1)}
     }
 
     pub fn pos(&self) -> &Vect<A> {
@@ -72,15 +72,15 @@ impl<A> VTri<A> {
     }
 
     pub fn dir0(&self) -> &Vect<A> {
-        &self.dir.0
+        &self.dirs.0
     }
 
     pub fn dir1(&self) -> &Vect<A> {
-        &self.dir.1
+        &self.dirs.1
     }
 
-    pub fn dir(&self) -> &(Vect<A>, Vect<A>) {
-        &self.dir
+    pub fn dirs(&self) -> &(Vect<A>, Vect<A>) {
+        &self.dirs
     }
 }
 
@@ -94,15 +94,15 @@ impl<A> OVTri<A> {
     }
 
     pub fn dir0(&self) -> &Vect<A> {
-        &self.tri.dir.0
+        &self.tri.dirs.0
     }
 
     pub fn dir1(&self) -> &Vect<A> {
-        &self.tri.dir.1
+        &self.tri.dirs.1
     }
 
     pub fn dirs(&self) -> &(Vect<A>, Vect<A>) {
-        &self.tri.dir
+        &self.tri.dirs
     }
 }
 
@@ -131,9 +131,11 @@ impl<A : Clone + HSub> Triangle<A> for PTri<A> {
 
 impl<A : Clone + HAdd> Triangle<A> for VTri<A> {
     fn points(&self) -> [Vect<A>; 3] {
-        let a = self.pos.clone();
-        let b = self.pos.clone() + self.dir.0.clone();
-        let c = self.pos.clone() + self.dir.1.clone();
+        let (ab, ac) = self.dirs();
+
+        let a = self.pos().clone();
+        let b = &a + ab;
+        let c = &a + ac;
 
         [a, b, c]
     }
