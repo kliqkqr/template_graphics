@@ -6,6 +6,9 @@ pub trait One {
     fn one() -> Self;
 }
 
+pub trait Float {
+    fn sqrt(self) -> Self;
+}
 
 impl Zero for f32 {
     fn zero() -> f32 {
@@ -100,5 +103,17 @@ impl One for i64 {
 impl One for isize {
     fn one() -> isize {
         1isize
+    }
+}
+
+impl Float for f32 {
+    fn sqrt(self) -> f32 {
+        f32::sqrt(self)
+    }
+}
+
+impl Float for f64 {
+    fn sqrt(self) -> f64 {
+        f64::sqrt(self)
     }
 }
