@@ -124,6 +124,7 @@ impl<A> IndSegMesh<A> {
     pub fn contour(&self) -> Option<Vec<usize>> 
     where A : Clone + HAdd + HSub + HMul + HDiv + POrd + Float + Zero + One + Two
     {       
+        // find start vertex index with max x value
         let mut indecis = self.vertex_indecis();
         let first = indecis.next()?;
 
@@ -135,6 +136,7 @@ impl<A> IndSegMesh<A> {
                 }
             });
 
+        // find next vertex index in contour with min left angle to positive x axis
         let adj_indecis = self.adjacent_vertices(start);
         let next = *adj_indecis.first()?;
         let start_next = self.vertex(next) - self.vertex(start);
@@ -152,20 +154,27 @@ impl<A> IndSegMesh<A> {
                 }
             }).0;
 
+        // find contour points until start vertex is found again
         let mut contour = vec![start, next];
         while contour.last()? != contour.first()? && contour.len() < 1000 {
+            // last 2 found vertix indecis
             let index_a = contour[contour.len() - 2];
             let index_b = contour[contour.len() - 1];
 
+            // last 2 found vertices
             let a = self.vertex(index_a);
             let b = self.vertex(index_b);
 
+            // direction vector of last found vertices
             let ba = a - b;
+
+            // vertices adjacent to last found vertex without penultimate vertex a
             let adjs = self.adjacent_vertices(index_b)
                 .into_iter()
                 .filter(|index| *index != index_a)
                 .collect::<Vec<usize>>();
 
+            // find next vertex in contour with min left angle to direction vector ba
             let next = adjs.first()?;
             let bn = self.vertex(*next) - b;
             let angle = ba.angle_l(&bn);
@@ -182,6 +191,7 @@ impl<A> IndSegMesh<A> {
                     }
                 }).0;
 
+            // add found next vertex to contour
             contour.push(*next);
         }
 
