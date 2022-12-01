@@ -9,3 +9,5 @@ edition = "2021"
 [dependencies]
 byteorder = "1.4.3"
 image = "0.24.5"
+rand = "*"
+itertools = "0.10.5"
