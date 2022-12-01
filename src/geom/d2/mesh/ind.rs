@@ -6,8 +6,6 @@ use std::ops::{
     Range
 };
 
-use itertools::PeekingNext;
-
 use crate::geom::d2::prim::rect::{
     BRect
 };
