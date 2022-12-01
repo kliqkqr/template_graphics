@@ -156,7 +156,7 @@ impl<A> IndSegMesh<A> {
 
         // find contour points until start vertex is found again
         let mut contour = vec![start, next];
-        while contour.last()? != contour.first()? && contour.len() < 1000 {
+        while contour.last()? != contour.first()? {
             // last 2 found vertix indecis
             let index_a = contour[contour.len() - 2];
             let index_b = contour[contour.len() - 1];
