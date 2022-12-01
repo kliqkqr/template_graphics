@@ -25,7 +25,7 @@ use crate::geom::d3::prim::{
 
 pub struct Tri {
     normal          : Vect<f32>,
-    vertices        : (Vect<f32>, Vect<f32>, Vect<f32>),
+    vertices        : [Vect<f32>; 3],
     attr_byte_count : u16 
 }
 
@@ -35,7 +35,7 @@ pub struct Stl {
 }
 
 impl Tri {
-    pub fn new(normal : Vect<f32>, vertices : (Vect<f32>, Vect<f32>, Vect<f32>), attr_byte_count : u16) -> Tri {
+    pub fn new(normal : Vect<f32>, vertices : [Vect<f32>; 3], attr_byte_count : u16) -> Tri {
         Tri{normal : normal, vertices : vertices, attr_byte_count : attr_byte_count}
     }
 
@@ -43,7 +43,7 @@ impl Tri {
         self.normal.clone()
     }
 
-    pub fn vertices(&self) -> (Vect<f32>, Vect<f32>, Vect<f32>) {
+    pub fn vertices(&self) -> [Vect<f32>; 3] {
         self.vertices.clone()
     }
 
@@ -98,11 +98,11 @@ impl Stl {
 
             let normal = Stl::read_vect_from_bytes(bytes)?;
 
-            let vertices = (
+            let vertices = [
                 Stl::read_vect_from_bytes(bytes[12..].as_ref())?,
                 Stl::read_vect_from_bytes(bytes[24..].as_ref())?,
                 Stl::read_vect_from_bytes(bytes[36..].as_ref())?
-            );
+            ];
 
             let attr_byte_count = bytes[48..].as_ref().read_u16::<LittleEndian>()?;
 

@@ -67,6 +67,14 @@ pub struct BRect<A> {
     end   : Vect<A>
 }
 
+pub struct GTRect<A, B : Borrow<Vect<A>>> {
+    pos : B,
+    dir : (B, B),
+    _ph : std::marker::PhantomData<*const A>
+}
+
+pub type STRect<A> = GTRect<A, Vect<A>>;
+
 //  IMPLS ---------------------------------------------------------------------------------------------------------------------------------
 
 impl<A, B : Segment<A>> SRect<A, B> {
@@ -174,6 +182,16 @@ impl<A> BRect<A> {
 
         BRect::new(start, end)
     }
+
+    #[deprecated]
+    pub fn bounds_with(&self, vect : &Vect<A>) -> BRect<A> 
+    where A : Clone + POrd
+    {
+        let start = self.start().min(vect);
+        let end   = self.end().max(vect);
+
+        BRect::new(start, end)
+    }
 }
 
 //  TRAITS --------------------------------------------------------------------------------------------------------------------------------
@@ -213,14 +231,14 @@ pub trait Rectangle<A> {
     /// from: https://math.stackexchange.com/questions/190111/how-to-check-if-a-point-is-inside-a-rectangle
     fn contains<'a, B>(&'a self, pnt : &Vect<A>) -> bool 
     where A        : Clone + Zero + HAdd + HSub + HMul + HNeg + POrd,
-          B        : Borrow<OVTri<A>>,
+          B        : Borrow<TRect<A>>,
           &'a Self : Easy<B> 
     {
-        let ovtri = self.easy();
+        let trect = self.easy();
 
-        let a = ovtri.borrow().pos();
+        let a = trect.borrow().pos();
         let ap = pnt - a;
-        let (ab, ac) = ovtri.borrow().dirs();
+        let (ab, ac) = trect.borrow().dirs();
 
         let ap_dot_ab = ap.dot(&ab);
         let ap_dot_ac = ap.dot(&ac);
@@ -241,9 +259,9 @@ impl<A, B : Rectangle<A>> From<&B> for TRect<A> {
     }
 }
 
-impl<'a, A> Easy<&'a OVTri<A>> for &'a TRect<A> {
-    fn easy(self) -> &'a OVTri<A> {
-        &self.tri
+impl<'a, A> Easy<&'a TRect<A>> for &'a TRect<A> {
+    fn easy(self) -> &'a TRect<A> {
+        &self
     }
 }
 

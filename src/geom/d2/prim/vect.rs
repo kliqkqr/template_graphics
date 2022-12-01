@@ -13,6 +13,7 @@ use crate::conv::{
 use crate::num::{
     Zero,
     One,
+    Two,
     Float
 };
 
@@ -20,7 +21,8 @@ use crate::ops::{
     HAdd,
     HSub,
     HMul,
-    HNeg,
+    HDiv,
+    HNeg
 };
 
 use crate::rel::{
@@ -82,6 +84,26 @@ impl<A> Vect<A> {
         (self.0.clone() * self.0.clone() + self.1.clone() * self.1.clone()).to().sqrt()
     }
 
+    pub fn add_mut(&mut self, other : &Vect<A>)
+    where A : Clone + HAdd 
+    {
+        self.0 = self.0.clone() + other.0.clone();
+        self.1 = self.1.clone() + other.1.clone();
+    }
+
+    pub fn vmul(&self, val : A) -> Vect<A> 
+    where A : Clone + HMul 
+    {
+        Vect::new(self.0.clone() * val.clone(), self.1.clone() * val)
+    }
+
+    pub fn vmul_mut(&mut self, val : A) 
+    where A : Clone + HMul
+    {
+        self.0 = self.0.clone() * val.clone();
+        self.1 = self.1.clone() * val;
+    }
+
     /// determinant of two vectors a b : (a0 * b1 - a1 * b0) 
     pub fn det(&self, other : &Vect<A>) -> A 
     where A : Clone + HSub + HMul
@@ -128,6 +150,35 @@ impl<A> Vect<A> {
     where A : Clone + HNeg
     {
         Vect::new(self.1.clone(), -self.0.clone())
+    }
+
+    pub fn left(&self, other : &Vect<A>) -> bool 
+    where A : Clone + HAdd + HSub + HMul + HDiv + Zero + POrd
+    {
+        let div = self.0.clone() * self.0.clone() + self.1.clone() * self.1.clone();
+        let r = self.det(other) / div;
+
+        r > A::zero()
+    }
+
+    pub fn angle(&self, other : &Vect<A>) -> A 
+    where A : Clone +  HAdd + HMul + Float
+    {
+        let dot = self.dot(other);
+        let div = self.len() * other.len();
+
+        (dot / div).acos()
+    }
+
+    pub fn angle_l(&self, other : &Vect<A>) -> A
+    where A : Clone + HAdd + HSub + HMul + HDiv + POrd + Zero + Float + Two
+    {
+        let angle = self.angle(other);
+
+        match self.left(other) {
+            false => A::two() * A::pi() - angle,
+            true  => angle
+        }
     }
 
     /// checks linear dependency of two vectors by checking if determinant is in range [0 - eps, 0 + eps]
