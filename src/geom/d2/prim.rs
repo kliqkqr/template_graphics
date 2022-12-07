@@ -1,5 +1,3 @@
-pub mod refactor;
-
 /// module for 2D line primitive
 pub mod line;
 

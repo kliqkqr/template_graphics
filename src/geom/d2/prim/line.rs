@@ -1,22 +1,5 @@
-use std::clone::{
-    Clone
-};
-
-use std::marker::{
-    PhantomData 
-};
-
-use crate::geom::d2::prim::seg::{
-    Segment
-};
-
-use crate::geom::d2::prim::vect::{
-    Vect
-};
-
 use crate::num::{
-    Zero,
-    One
+    Zero
 };
 
 use crate::ops::{
@@ -27,32 +10,52 @@ use crate::ops::{
 };
 
 use crate::rel::{
-    POrd
+    HPEq,
+    HPOrd
 };
 
-//  TYPES ---------------------------------------------------------------------------------------------------------------------------------
+use crate::geom::d2::prim::vect::{
+    Vector
+};
 
-/// 2D line defined by 1 line segment "seg"
-#[derive(Debug)]
-pub struct SLine<A, B : Segment<A>> {
-    seg     : B,
-    _phant  : PhantomData<A>
-}
+use crate::geom::d2::prim::seg::{
+    Segment 
+};
 
-//  TRAITS --------------------------------------------------------------------------------------------------------------------------------
+pub trait Line : Segment {
+    /// optional intersection between to lines without epsilon zero checks
+    ///
+    /// a + r * b = c + s * d
+    ///
+    /// => r = (det(d, c) + det(a, d)) / det(d, b)
+    fn intsec<S : Segment<Val = Self::Val>>(&self, other : S) -> Option<<Self::Vect as Vector>::Own> 
+    where Self::Val : Zero + HAdd + HSub + HMul + HDiv + HPEq
+    {   
+        let [s_a, s_ab] = self.vects();
+        let [o_a, o_ab] = other.vects();
 
-pub trait Line<A> : Segment<A> {
-    fn intsec<B : Line<A>>(&self, other : &B, eps : A) -> Option<Vect<A>> 
-    where A : Clone + One + Zero + HAdd + HSub + HMul + HDiv + POrd 
-    {
-        let a = self.pos();
-        let ab = self.dir();
-        let c = other.pos();
-        let cd = other.dir();
+        let div = o_ab.indep_det(&s_ab)?;
+        let r   = o_ab.det(&o_a) + s_a.det(&o_ab) / div;
 
-        let div = cd.lin_dep_det(&ab, eps)?;
-        let r = cd.det(&c) + a.det(&cd) / div;
+        let p = s_a.add(s_ab.vmul(r));
+        Some(p)
+    }
 
-        Some(a + ab * r)
+    /// optional intersection between to lines with epsilon zero checks
+    ///
+    /// a + r * b = c + s * d
+    ///
+    /// => r = (det(d, c) + det(a, d)) / det(d, b)
+    fn intsec_eps<S : Segment<Val = Self::Val>>(&self, other : S, eps : Self::Val) -> Option<<Self::Vect as Vector>::Own> 
+    where Self::Val : Zero + HAdd + HSub + HMul + HDiv + HPOrd
+    {   
+        let [s_a, s_ab] = self.vects();
+        let [o_a, o_ab] = other.vects();
+
+        let div = o_ab.indep_det_eps(&s_ab, eps)?;
+        let r   = o_ab.det(&o_a) + s_a.det(&o_ab) / div;
+
+        let p = s_a.add(s_ab.vmul(r));
+        Some(p)
     }
 }
