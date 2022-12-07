@@ -7,8 +7,7 @@ use std::option::{
 };
 
 use crate::conv::{
-    To,
-    Ref
+    To
 };
 
 use crate::num::{
@@ -33,14 +32,11 @@ use crate::rel::{
 pub trait Vector {
     /// value type of vector
     type Val : Copy;
+    /// type that owns it values returned by methods
+    type Own : Vector<Val = Self::Val, Own = Self::Own>;
 
-    /// type created by Vector::new so that Vector can be implemented for references 
-    /// 
-    /// should always be Self for value types and *Self for references
-    type Out : Vector<Val = Self::Val, Out = Self::Out>;
-
-    /// create new vector of 2 values
-    fn of_vals(x : Self::Val, y : Self::Val) -> Self::Out;
+    /// create new vector of other vector
+    fn of<V : Vector<Val = Self::Val>>(vect : V) -> Self::Own;
 
     /// first value of vector
     fn x(&self) -> Self::Val;
@@ -48,35 +44,34 @@ pub trait Vector {
     /// second value of vector
     fn y(&self) -> Self::Val;
 
-    /// create new vector of 1 value
-    fn of_val(val : Self::Val) -> Self::Out {
-        Self::of_vals(val, val)
-    }
-
     /// create new vector where values are 0
-    fn zero() -> Self::Out
+    fn zero() -> Self::Own
     where Self::Val : Zero 
-    {   
-        Self::of_val(Self::Val::zero())
+    {       
+        let zero = Self::Val::zero();
+
+        Self::of((zero, zero))
     }    
 
     /// create new vector where values are 1
-    fn one() -> Self::Out
+    fn one() -> Self::Own
     where Self::Val : One
     {
-        Self::of_val(Self::Val::one())
+        let one = Self::Val::one();
+
+        Self::of((one, one))
     }
     
     /// both values of vector
-    fn vals(&self) -> (Self::Val, Self::Val) {
-        (self.x(), self.y())
+    fn vals(&self) -> [Self::Val; 2] {
+        [self.x(), self.y()]
     }
 
     /// length of float vector
     fn len(&self) -> Self::Val 
     where Self::Val : Float
     {
-        let (x, y) = self.vals();
+        let [x, y] = self.vals();
         (x * x + y * y).sqrt()
     }    
 
@@ -84,106 +79,106 @@ pub trait Vector {
     fn len_as<F : Float>(&self) -> F 
     where Self::Val : To<F> + HAdd + HMul
     {
-        let (x, y) = self.vals();
+        let [x, y] = self.vals();
         (x * x + y * y).to().sqrt()
     }
 
     /// add two vectors componentwise
-    fn add<V : Vector<Val = Self::Val>, R : Ref<V>>(&self, other : R) -> Self::Out
+    fn add<V : Vector<Val = Self::Val>>(&self, other : V) -> Self::Own
     where Self::Val : HAdd 
     {
-        let x = self.x() + other.r().x();
-        let y = self.x() + other.r().y();
+        let x = self.x() + other.x();
+        let y = self.x() + other.y();
 
-        Self::of_vals(x, y)
-    }
+        Self::of((x, y))
+    } 
 
     /// add two vectors componentwise
-    fn sub<V : Vector<Val = Self::Val>>(&self, other : V) -> Self::Out
+    fn sub<V : Vector<Val = Self::Val>>(&self, other : V) -> Self::Own
     where Self::Val : HSub 
     {
-        let x = self.x() - other.r().x();
-        let y = self.y() - other.r().y();
+        let x = self.x() - other.x();
+        let y = self.y() - other.y();
 
-        Self::of_vals(x, y)
+        Self::of((x, y))
     }
 
     /// add two vectors componentwise
-    fn mul<V : Vector<Val = Self::Val>>(&self, other : V) -> Self::Out
+    fn mul<V : Vector<Val = Self::Val>>(&self, other : V) -> Self::Own
     where Self::Val : HMul 
     {
-        let x = self.x() * other.r().x();
-        let y = self.y() * other.r().y();
+        let x = self.x() * other.x();
+        let y = self.y() * other.y();
 
-        Self::of_vals(x, y)
+        Self::of((x, y))
     }
 
     /// add two vectors componentwise
-    fn div<V : Vector<Val = Self::Val>>(&self, other : V) -> Self::Out
+    fn div<V : Vector<Val = Self::Val>>(&self, other : V) -> Self::Own
     where Self::Val : HDiv 
     {
-        let x = self.x() / other.r().x();
-        let y = self.y() / other.r().y();
+        let x = self.x() / other.x();
+        let y = self.y() / other.y();
 
-        Self::of_vals(x, y)
+        Self::of((x, y))
     }  
 
     /// negate vector componentwise
-    fn neg(&self) -> Self::Out
+    fn neg(&self) -> Self::Own
     where Self::Val : HNeg 
     {
         let x = -self.x();
         let y = -self.y();
 
-        Self::of_vals(x, y)
+        Self::of((x, y))
     }
 
     /// add value to vector componentwise
-    fn vadd(&self, val : Self::Val) -> Self::Out 
+    fn vadd(&self, val : Self::Val) -> Self::Own 
     where Self::Val : HAdd 
     {
         let x = self.x() + val;
         let y = self.y() + val;
 
-        Self::of_vals(x, y)
+        Self::of((x, y))
     }
 
     /// sub value from vector componentwise
-    fn vsub(&self, val : Self::Val) -> Self::Out 
+    fn vsub(&self, val : Self::Val) -> Self::Own 
     where Self::Val : HSub 
     {
         let x = self.x() - val;
         let y = self.y() - val;
 
-        Self::of_vals(x, y)
+        Self::of((x, y))
     }
 
     /// mul value to vector componentwise
-    fn vmul(&self, val : Self::Val) -> Self::Out 
+    fn vmul(&self, val : Self::Val) -> Self::Own 
     where Self::Val : HMul 
     {
         let x = self.x() * val;
         let y = self.y() * val;
 
-        Self::of_vals(x, y)
+        Self::of((x, y))
     }
 
     /// sub value from vector componentwise
-    fn vdiv(&self, val : Self::Val) -> Self::Out 
+    fn vdiv(&self, val : Self::Val) -> Self::Own 
     where Self::Val : HDiv 
     {
         let x = self.x() / val;
         let y = self.y() / val;
 
-        Self::of_vals(x, y)
+        Self::of((x, y))
     }
 
     /// map function over vector values and convert Self to some other Vector
-    fn map<A, F : Fn(Self::Val) -> A, V : Vector<Val = A, Out = V>>(&self, func : F) -> V {
+    fn map<A : Copy, F : Fn(Self::Val) -> A, V : Vector<Val = A, Own = V>>(&self, func : F) -> V {
         let x = func(self.x());
         let y = func(self.y());
 
-        V::of_vals(x, y)
+        V::of((x, y))
     }
 
     /// determinant of two vectors a b : (a.x * b.y - a.y * b.x) 
@@ -201,40 +196,40 @@ pub trait Vector {
     }
 
     /// componentwise min of two vectors
-    fn min<V : Vector<Val = Self::Val>>(&self, other : V) -> Self::Out
+    fn min<V : Vector<Val = Self::Val>>(&self, other : V) -> Self::Own
     where Self::Val : HPOrd 
     {
         let x = self.x().min(other.x());
         let y = self.y().min(other.y());
 
-        Self::of_vals(x, y)
+        Self::of((x, y))
     }
 
     /// componentwise max of two vectors
-    fn max<V : Vector<Val = Self::Val>>(&self, other : V) -> Self::Out
+    fn max<V : Vector<Val = Self::Val>>(&self, other : V) -> Self::Own
     where Self::Val : HPOrd 
     {
         let x = self.x().max(other.x());
         let y = self.y().max(other.y());
 
-        Self::of_vals(x, y)
+        Self::of((x, y))
     }
 
     /// rotate vector 90°
-    fn orth_l(&self) -> Self::Out 
+    fn orth_l(&self) -> Self::Own 
     where Self::Val : HNeg
     {
-        Self::of_vals(-self.y(), self.x())
+        Self::of((-self.y(), self.x()))
     }
 
     /// rotate vector 270°
-    fn orth_r(&self) -> Self::Out 
+    fn orth_r(&self) -> Self::Own 
     where Self::Val : HNeg
     {
-        Self::of_vals(self.y(), -self.x())
+        Self::of((self.y(), -self.x()))
     }
 
-    /// checks linear dependency of two vectors by checking if determinant is in range [0 - eps, 0 + eps]
+    /// checks linear dependency of two vectors by checking if determinant is 0
     fn lin_dep<V : Vector<Val = Self::Val>>(&self, other : V) -> bool
     where Self::Val : Zero + HAdd + HSub + HMul + HPEq
     {
@@ -244,7 +239,7 @@ pub trait Vector {
         det == zero
     }
 
-    /// checks linear dependency of two vectors by checking if determinant is in range [0 - eps, 0 + eps]
+    /// checks linear dependency of two vectors by checking if determinant is in [0 - eps, 0 + eps]
     fn lin_dep_eps<V : Vector<Val = Self::Val>>(&self, other : V, eps : Self::Val) -> bool
     where Self::Val : Zero + HAdd + HSub + HMul + HPOrd
     {
@@ -254,7 +249,7 @@ pub trait Vector {
         det.inc_in(zero - eps, zero + eps)
     }
 
-    /// returns determinant if two vectors are linear independent
+    /// returns determinant if two vectors are linear independent (det == 0)
     fn indep_det<V : Vector<Val = Self::Val>>(&self, other : V) -> Option<Self::Val> 
     where Self::Val : Zero + HAdd + HSub + HMul + HPEq
     {   
@@ -267,7 +262,7 @@ pub trait Vector {
         }
     } 
 
-    /// returns determinant if two vectors are linear independent
+    /// returns determinant if two vectors are linear independent (det in [0 - eps, 0 + eps])
     fn indep_det_eps<V : Vector<Val = Self::Val>>(&self, other : V, eps : Self::Val) -> Option<Self::Val> 
     where Self::Val : Zero + HAdd + HSub + HMul + HPOrd
     {   
@@ -281,55 +276,53 @@ pub trait Vector {
     }    
 }
 
-impl<'a, A : Vector> Vector for &'a A {
-    type Val = A::Val;
+impl<'a, Vect : Vector> Vector for &'a Vect {
+    type Val = Vect::Val;
+    type Own = Vect::Own;
 
-    type Out = A::Out;
-
-    fn of_vals(x : Self::Val, y : Self::Val) -> Self::Out {
-        A::of_vals(x, y)
+    fn of<V : Vector<Val = Vect::Val>>(vect : V) -> Vect::Own {
+        Vect::of(vect)
     }
 
     fn x(&self) -> Self::Val {
-        A::x(self)
+        Vect::x(self)
     }
 
     fn y(&self) -> Self::Val {
-        A::y(self)
+        Vect::y(self)
     }
 }
 
-impl<A : Copy> Vector for (A, A) {
-    type Val = A;
-    type Out = (A, A);
+impl<Val : Copy> Vector for (Val, Val) {
+    type Val = Val;
+    type Own = (Val, Val);
 
-    fn of_vals(x : Self::Val, y : Self::Val) -> Self::Out {
-        (x, y)
+    fn of<V : Vector<Val = Val>>(vect : V) -> (Val, Val) {
+        (vect.x(), vect.y())
     }
 
-    fn x(&self) -> Self::Val {
+    fn x(&self) -> Val {
         self.0
     }
 
-    fn y(&self) -> Self::Val {
+    fn y(&self) -> Val {
         self.1
     }
 } 
 
-impl<A : Copy> Vector for [A; 2] {
-    type Val = A;
-    type Out = [A; 2];
+impl<Val : Copy> Vector for [Val; 2] {
+    type Val = Val;
+    type Own = [Val; 2];
 
-    fn of_vals(x : Self::Val, y : Self::Val) -> Self::Out {
-        [x, y]
+    fn of<V : Vector<Val = Val>>(vect : V) -> [Val; 2] {
+        [vect.x(), vect.y()]
     }
 
-    fn x(&self) -> Self::Val {
+    fn x(&self) -> Val {
         self[0]
     }
 
-    fn y(&self) -> Self::Val {
+    fn y(&self) -> Val {
         self[1]
     }
 }
-

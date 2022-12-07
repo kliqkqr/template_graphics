@@ -28,14 +28,11 @@ pub trait Line : Segment {
     /// a + r * b = c + s * d
     ///
     /// => r = (det(d, c) + det(a, d)) / det(d, b)
-    fn intsec<S : Segment<Val = Self::Val>>(&self, other : S) -> Option<Self::Vect> 
+    fn intsec<S : Segment<Val = Self::Val>>(&self, other : S) -> Option<<Self::Vect as Vector>::Own> 
     where Self::Val : Zero + HAdd + HSub + HMul + HDiv + HPEq
     {   
-        let s_a  = self.a();
-        let s_ab = self.ab();
-
-        let o_a  = other.a();
-        let o_ab = other.ab();
+        let [s_a, s_ab] = self.vects();
+        let [o_a, o_ab] = other.vects();
 
         let div = o_ab.indep_det(&s_ab)?;
         let r   = o_ab.det(&o_a) + s_a.det(&o_ab) / div;
@@ -49,14 +46,11 @@ pub trait Line : Segment {
     /// a + r * b = c + s * d
     ///
     /// => r = (det(d, c) + det(a, d)) / det(d, b)
-    fn intsec_eps<S : Segment<Val = Self::Val>>(&self, other : S, eps : Self::Val) -> Option<Self::Vect> 
+    fn intsec_eps<S : Segment<Val = Self::Val>>(&self, other : S, eps : Self::Val) -> Option<<Self::Vect as Vector>::Own> 
     where Self::Val : Zero + HAdd + HSub + HMul + HDiv + HPOrd
     {   
-        let s_a  = self.a();
-        let s_ab = self.ab();
-
-        let o_a  = other.a();
-        let o_ab = other.ab();
+        let [s_a, s_ab] = self.vects();
+        let [o_a, o_ab] = other.vects();
 
         let div = o_ab.indep_det_eps(&s_ab, eps)?;
         let r   = o_ab.det(&o_a) + s_a.det(&o_ab) / div;
