@@ -61,7 +61,7 @@ pub trait Shape {
     fn vdiv(&self, val : Self::Val) -> Self::Own
     where Self::Val : HDiv;
 
-    /// bounding axe aligned rectangle of shape
+    /// bounding axis aligned rectangle of shape
     fn bounds(&self) -> Bounds<<Self::Vect as Vector>::Own>;
 
     /// checks if shape contains point
