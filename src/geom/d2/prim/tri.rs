@@ -514,38 +514,6 @@ pub trait Triangle : Shape {
     /// direction vector of triangle with ac() = c() - a()
     fn ac(&self) -> <Self::Vect as Vector>::Own;
 
-    // /// add vector to triangle points (translation)
-    // fn add<V : Vector<Val = Self::Val>>(&self, vect : V) -> Self::Own
-    // where Self::Val : HAdd;
-
-    // /// sub vector from triangle points (translation)
-    // fn sub<V : Vector<Val = Self::Val>>(&self, vect : V) -> Self::Own
-    // where Self::Val : HSub;
-
-    // /// mul vector to triangle points
-    // fn mul<V : Vector<Val = Self::Val>>(&self, vect : V) -> Self::Own
-    // where Self::Val : HMul;
-
-    // /// div vector from triangle points
-    // fn div<V : Vector<Val = Self::Val>>(&self, vect : V) -> Self::Own
-    // where Self::Val : HDiv;
-
-    // /// add vector values with value
-    // fn vadd(&self, val : Self::Val) -> Self::Own
-    // where Self::Val : HAdd;
-
-    // // sub vector values with value
-    // fn vsub(&self, val : Self::Val) -> Self::Own
-    // where Self::Val : HSub;
-
-    // /// mul vector values with value (scaling)
-    // fn vmul(&self, val : Self::Val) -> Self::Own
-    // where Self::Val : HMul;
-
-    // // div vector values with value (scaling)
-    // fn vdiv(&self, val : Self::Val) -> Self::Own
-    // where Self::Val : HDiv;
-
     /// points of triangle with pnts() = \[a(), b(), c()\]
     fn pnts(&self) -> [<Self::Vect as Vector>::Own; 3] {
         [self.a(), self.b(), self.c()]
@@ -559,15 +527,6 @@ pub trait Triangle : Shape {
     /// direction vectors of triangle with dirs() = \[ab(), ac()\]
     fn dirs(&self) -> [<Self::Vect as Vector>::Own; 2] {
         [self.ab(), self.ac()]
-    }
-
-    /// check if triangle contains point with baryzentric coordinates
-    /// 
-    /// slightly slower then implicit line equation check but more precise
-    fn contains<V : Vector<Val = Self::Val>>(&self, pnt : V) -> bool 
-    where Self::Val : Zero + HAdd + HSub + HMul + HPOrd + HNeg
-    {   
-        contains_with_barycentric_coords(self, pnt)
     }
 }
 
@@ -598,6 +557,8 @@ macro_rules! impl_triangle {
         }
     };
 }
+
+pub(crate) use impl_triangle;
 
 impl<Vect : Vector> Shape for PTri<Vect> 
 where Vect::Val : Zero + HSub + HMul + HPOrd
