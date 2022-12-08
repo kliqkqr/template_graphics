@@ -3,6 +3,11 @@ use image::{
     RgbImage
 };
 
+use crate::geom::d2::shape::d2::{
+    Bounds , 
+    Shape
+};
+
 use crate::geom::d2::prim::rect::{
     Rectangle
 };
@@ -11,6 +16,12 @@ use crate::geom::d2::prim::rect::{
 use crate::range::{
     range
 };
+
+pub fn fill_shape<Sh : Shape>(image : &mut RgbImage, shape : Sh, color : Rgb<u8>) {
+    let bounds = shape.bounds();
+
+    
+}
 
 // pub fn fill_rect<A : Rectangle>(image : &mut RgbImage, rect : &A, color : Rgb<u8>) {
 //     let (width, height) = image.dimensions();
