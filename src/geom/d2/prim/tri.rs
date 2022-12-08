@@ -2,9 +2,9 @@ use std::marker::{
     Copy 
 };
 
-use crate::geom::d2::obj::d2::{
+use crate::geom::d2::shape::d2::{
     Bounds,
-    Object
+    Shape
 };
 
 use crate::geom::d2::prim::vect::{
@@ -448,7 +448,7 @@ impl<Vect : Vector> VTri<Vect> {
     }
 }
 
-pub trait Triangle : Object {
+pub trait Triangle : Shape {
     // /// the value type of vector
     // type Val  : Copy;
     // /// the vector type of Self
@@ -607,7 +607,7 @@ macro_rules! impl_triangle {
     };
 }
 
-impl<Vect : Vector> Object for PTri<Vect> 
+impl<Vect : Vector> Shape for PTri<Vect> 
 where Vect::Val : Zero + HSub + HMul + HPOrd
 {
     type Val  = Vect::Val;
@@ -625,7 +625,7 @@ where Vect::Val : Zero + HSub + HMul + HPOrd
     }
 }
 
-impl<Vect : Vector> Object for VTri<Vect>
+impl<Vect : Vector> Shape for VTri<Vect>
 where Vect::Val : Zero + HAdd + HSub + HMul + HPOrd
 {
     type Val  = Vect::Val;

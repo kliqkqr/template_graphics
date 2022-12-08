@@ -17,7 +17,7 @@ impl<Vect : Vector> Bounds<Vect> {
     }
 }
 
-pub trait Object {
+pub trait Shape {
     type Val  : Copy;
     type Vect : Vector<Val = Self::Val>;
 
@@ -25,15 +25,15 @@ pub trait Object {
     fn contains<V : Vector<Val = Self::Val>>(&self, pnt : V) -> bool;
 }
 
-impl<'a, Obj : Object> Object for &'a Obj {
-    type Val  = Obj::Val;
-    type Vect = Obj::Vect;
+impl<'a, Sh : Shape> Shape for &'a Sh {
+    type Val  = Sh::Val;
+    type Vect = Sh::Vect;
 
     fn bounds(&self) -> Bounds<<Self::Vect as Vector>::Own> {
-        Obj::bounds(self)
+        Sh::bounds(self)
     }
 
     fn contains<V : Vector<Val = Self::Val>>(&self, pnt : V) -> bool {
-        Obj::contains(self, pnt)
+        Sh::contains(self, pnt)
     }
 }

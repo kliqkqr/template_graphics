@@ -5,4 +5,4 @@ pub mod prim;
 pub mod mesh;
 
 /// module for 2D objects
-pub mod obj;
+pub mod shape;
