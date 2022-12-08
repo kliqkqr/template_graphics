@@ -1,5 +1,6 @@
+use tg::geom::d2::prim::tri::*;
+
 fn main() {
-    
 }
 
 // #![allow(dead_code)]
