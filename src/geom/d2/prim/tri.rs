@@ -564,7 +564,7 @@ impl<Vect : Vector> Shape for PTri<Vect>
 where Vect::Val : Zero + HSub + HMul + HPOrd
 {
     type Val  = Vect::Val;
-    type Vect = Vect;
+    type Vect = Vect::Own;
     type Own  = PTri<Vect::Own>;
 
     impl_shape!(PTri<Vect>);
@@ -574,7 +574,7 @@ impl<Vect : Vector> Shape for VTri<Vect>
 where Vect::Val : Zero + HAdd + HSub + HMul + HPOrd
 {
     type Val  = Vect::Val;
-    type Vect = Vect;
+    type Vect = Vect::Own;
     type Own  = VTri<Vect::Own>;
 
     impl_shape!(VTri<Vect>);
@@ -692,4 +692,5 @@ where V::Val : Zero + HAdd + HSub + HMul + HPOrd + HNeg,
 
     true
 }
+
 

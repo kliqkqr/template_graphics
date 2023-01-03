@@ -3,60 +3,94 @@ use image::{
     RgbImage
 };
 
+use crate::conv::{
+    Cast
+};
+
+use crate::geom::d2::prim::PRect;
 use crate::geom::d2::shape::d2::{
-    Bounds , 
+    Bounds, 
     Shape
 };
 
-use crate::geom::d2::prim::rect::{
-    Rectangle
+use crate::geom::d2::prim::seg::{
+    Segment 
 };
 
-
-use crate::range::{
-    range
+use crate::geom::d2::prim::vect::{
+    Vector 
 };
 
-pub fn fill_shape<Sh : Shape>(image : &mut RgbImage, shape : Sh, color : Rgb<u8>) {
-    let bounds = shape.bounds();
+use crate::num::{
+    Zero,
+    One,
+    Two,
+    Float
+};
 
-    
+use crate::rel::{
+    HPOrd
+};
+
+pub fn horizontal_flip(image : &mut RgbImage) {
+    let (width, height) = image.dimensions();
+
+    for y in 0 .. height / 2 {
+        for x in 0 .. width {
+            let a = image.get_pixel(x, y).clone();
+            let b = image.get_pixel(x, height - y - 1).clone();
+
+            image.put_pixel(x, y, b);
+            image.put_pixel(x, height - y - 1, a);
+        }
+    }
 }
 
-// pub fn fill_rect<A : Rectangle>(image : &mut RgbImage, rect : &A, color : Rgb<u8>) {
-//     let (width, height) = image.dimensions();
-//     let dims = BRect::start_zero_unchecked(Vect::new(width, height));
+pub fn fill_shape_float<Sh : Shape, Func : Fn(<Sh::Vect as Vector>::Own) -> Rgb<u8>>(image : &mut RgbImage, shape : Sh, color : Func) 
+where Sh::Val : One + Two + Float + Cast<u32>,
+      u32     : Cast<Sh::Val>
+{   
+    let half = Sh::Val::one() / Sh::Val::two();
 
-//     let dims = 
+    let im_bounds = Bounds::with_zero_unchecked(image.dimensions());
+    let sh_bounds = shape.bounds().vmap::<(u32, u32), _>(|val| val.cast());
 
-//     let bounds = rect.bounds().map(|v| v.map(|f| *f as u32));
-//     let bounds = dims.clamp(bounds);
+    let bounds = im_bounds.clamp(sh_bounds);
+    let start = bounds.start();
+    let end   = bounds.end();
 
-//     let start = bounds.start();
-//     let end   = bounds.end();
+    for x in start.x()..end.x() {
+        for y in start.y()..end.y() {
+            let point = <Sh::Vect as Vector>::of((u32::cast(x), u32::cast(y))).vadd(half);
 
-//     let rect = TRect::from(rect);
+            if shape.contains(&point) {
+                let pixel = color(point);
+                image.put_pixel(x, y, pixel);
+            }
+        }
+    }
+}
 
-//     for x in range(start.0, end.0) {
-//         for y in range(start.1, end.1) {
-//             let point = Vect::new(x as f32, y as f32) + 0.5f32;
+pub fn draw_seg_float<Seg : Segment, Func : Fn(<Seg::Vect as Vector>::Own) -> Rgb<u8>>(image : &mut RgbImage, seg : Seg, color : Func, width : Seg::Val)
+where Seg::Val  : Zero + One + Two + Float + Cast<u32> + HPOrd,
+      u32       : Cast<Seg::Val>
+{
+    let half_width = width / Seg::Val::two();
 
-//             if rect.contains::<&TRect<f32>>(&point) {
-//                 image.put_pixel(x, y, color);
-//             }
-//         }
-//     }
-// }
+    let seg_ab = seg.ab();
+    let scalar = half_width / seg_ab.len();
 
-// pub fn draw_seg<A : Segment<f32>>(image : &mut RgbImage, seg : &A, color : Rgb<u8>, width : f32) {
-//     let seg_dir = seg.dir();
-//     let seg_len = seg_dir.len();
-//     let offset_ratio = (width / 2.0) / seg_len;
-//     let seg_offset = seg_dir.orth_r() * offset_ratio;
+    let offset_l = seg_ab.orth_l().vmul(scalar);
+    let offset_r = seg_ab.orth_r().vmul(scalar);
 
-//     let offset_seg = seg.add(&seg_offset);
-//     let rect_ratio = width / seg_len;
-//     let rect = SRect::new(offset_seg, rect_ratio);
+    let seg_a = seg.a();
+    let seg_b = seg.b();
+    
+    let a = seg_a.add(&offset_l);
+    let b = seg_b.add(&offset_l);
+    let c = seg_b.add(&offset_r);
+    let d = seg_a.add(&offset_r);
 
-//     fill_rect(image, &rect, color);
-// }
+    let rect = PRect::new_unchecked(a, b, c, d);
+    fill_shape_float(image, rect, color);
+}

@@ -1,3 +1,7 @@
+use std::marker::{
+    Copy 
+};
+
 use crate::ops::{
     HAdd,
     HSub,
@@ -19,7 +23,11 @@ pub trait Two {
     fn two() -> Self;
 }
 
-pub trait Float : HAdd + HSub + HMul + HDiv + HRem + HNeg {
+pub trait Integer : Copy + HAdd + HSub + HMul + HDiv + HRem + HNeg {
+
+}
+
+pub trait Float : Copy + Zero + One + Two + HAdd + HSub + HMul + HDiv + HRem + HNeg {
     fn sqrt(self) -> Self;
 
     fn acos(self) -> Self;

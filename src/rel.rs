@@ -81,3 +81,21 @@ impl<A : PartialOrd<Rhs>, Rhs> POrd<Rhs> for A {}
 impl<A : POrd> HPOrd for A {}
 
 impl<A : POrd<A>> ExtHPOrd for A {}
+
+pub fn min_by<A, B, Func : Fn(&A) -> B>(a : A, b : A, key : Func) -> A
+where B : HPOrd
+{
+    match key(&a) <= key(&b) {
+        false => b,
+        true  => a
+    }
+}
+
+pub fn max_by<A, B, Func : Fn(&A) -> B>(a : A, b : A, key : Func) -> A
+where B : HPOrd
+{
+    match key(&a) >= key(&b) {
+        false => b,
+        true  => a
+    }
+}

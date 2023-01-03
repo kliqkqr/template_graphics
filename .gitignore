@@ -3,3 +3,5 @@ Cargo.lock
 /output.txt
 /*.bmp
 /backup
+/rrcontour_examples
+/rrcontour_examples_bte

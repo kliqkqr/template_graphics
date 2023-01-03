@@ -53,4 +53,8 @@ impl IndSeg {
         self.a = std::cmp::min(self.a(), self.b());
         self.b = std::cmp::max(self.a(), self.b());
     }
+
+    pub fn contains_index(&self, index : usize) -> bool {
+        self.a() == index || self.b() == index
+    }
 }

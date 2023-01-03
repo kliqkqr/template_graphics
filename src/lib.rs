@@ -23,3 +23,6 @@ pub mod range;
 
 /// module for relations
 pub mod rel;
+
+/// module for tests
+pub mod test;

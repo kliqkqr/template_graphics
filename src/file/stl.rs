@@ -67,7 +67,7 @@ impl Stl {
         let y = bytes[4..].as_ref().read_f32::<LittleEndian>()?;
         let z = bytes[8..].as_ref().read_f32::<LittleEndian>()?;
 
-        Ok(Vect::new(x, y, z))
+        Ok((x, y, z))
     }
 
     pub fn read_binary<A : AsRef<Path>>(path : A) -> io::Result<Stl> {

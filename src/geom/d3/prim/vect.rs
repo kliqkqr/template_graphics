@@ -1,52 +1,77 @@
-use std::clone::{
-    Clone
-};
-
 use std::marker::{
-    Copy
+    Copy 
 };
 
-use crate::ops::{
-    HMul
+use crate::rel::{
+    HPEq 
 };
 
-//  TYPES ---------------------------------------------------------------------------------------------------------------------------------
+pub type Vect<Val> = (Val, Val, Val);
 
-/// 2D vector with 2 values "0" "1"
-#[derive(PartialEq, Eq, Hash, Debug)]
-pub struct Vect<A>(pub A, pub A, pub A);
+pub trait Vector {
+    /// value type of vector
+    type Val : Copy;
+    /// type that owns it values returned by methods
+    type Own : Vector<Val = Self::Val, Own = Self::Own>;
 
-//  IMPLS ---------------------------------------------------------------------------------------------------------------------------------
+    /// create new vector of other vector
+    fn of<V : Vector<Val = Self::Val>>(vect : V) -> Self::Own;
 
-impl<A : Copy> Vect<A> {
-    pub fn new(x : A, y : A, z : A) -> Vect<A> {
-        Vect(x, y, z)
+    /// first value of vector
+    fn x(&self) -> Self::Val;
+
+    /// second value of vector
+    fn y(&self) -> Self::Val;
+
+    /// third value of vector
+    fn z(&self) -> Self::Val;
+
+    /// checks equality componentwise
+    fn equal<V : Vector<Val = Self::Val>>(&self, other : V) -> bool  
+    where Self::Val : HPEq
+    {
+        self.x() == other.x() && self.y() == other.y() && self.z() == other.z()
     }
-    
-    pub fn x(&self) -> A {
+}
+
+impl<'a, Vect : Vector> Vector for &'a Vect {
+    type Val = Vect::Val;
+    type Own = Vect::Own;
+
+    fn of<V : Vector<Val = Self::Val>>(vect : V) -> Self::Own {
+        Vect::of(vect)
+    }
+
+    fn x(&self) -> Self::Val {
+        Vect::x(self)
+    }
+
+    fn y(&self) -> Self::Val {
+        Vect::y(self)
+    }
+
+    fn z(&self) -> Self::Val {
+        Vect::z(self)
+    }
+}
+
+impl<Val : Copy> Vector for Vect<Val> {
+    type Val = Val;
+    type Own = Vect<Val>;
+
+    fn of<V : Vector<Val = Self::Val>>(vect : V) -> Self::Own {
+        (vect.x(), vect.y(), vect.z())
+    }
+
+    fn x(&self) -> Self::Val {
         self.0
     }
 
-    pub fn y(&self) -> A {
+    fn y(&self) -> Self::Val {
         self.1
     }
 
-    pub fn z(&self) -> A {
+    fn z(&self) -> Self::Val {
         self.2
     }
-
-    pub fn vmul(&self, val : A) -> Vect<A> 
-    where A : HMul
-    {
-        Vect::new(self.x() * val, self.y() * val, self.z() * val)
-    }
 }
-
-//  TRAIT IMPLS ---------------------------------------------------------------------------------------------------------------------------
-
-impl<A : Copy> Clone for Vect<A> {
-    fn clone(&self) -> Vect<A> {
-        Vect::new(self.0.clone(), self.1.clone(), self.2.clone())
-    }
-}
-

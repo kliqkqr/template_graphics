@@ -162,18 +162,18 @@ impl<Vect : Vector> PRect<Vect> {
     where Vect::Val : Zero + HAdd + HSub + HMul + HPOrd
     {
         let ab = self.ab();
-        let ac = self.ac();
+        let ad = self.ad();
         let ap = pnt.sub(self.a());
 
         let ap_dot_ab = ap.dot(&ab);
-        let ap_dot_ac = ap.dot(&ac);
+        let ap_dot_ad = ap.dot(&ad);
 
         let zero = Vect::Val::zero();
 
         let ab_check = zero <= ap_dot_ab && ap_dot_ab <= ab.dot(&ab);
-        let ac_check = zero <= ap_dot_ac && ap_dot_ac <= ac.dot(&ac);
+        let ad_check = zero <= ap_dot_ad && ap_dot_ad <= ad.dot(&ad);
 
-        ab_check && ac_check
+        ab_check && ad_check
     }
 
     // Rectangle methods
@@ -366,18 +366,18 @@ impl<Vect : Vector> VRect<Vect> {
     where Vect::Val : Zero + HAdd + HSub + HMul + HPOrd
     {
         let ab = self.ab();
-        let ac = self.ac();
+        let ad = self.ad();
         let ap = pnt.sub(self.a());
 
         let ap_dot_ab = ap.dot(&ab);
-        let ap_dot_ac = ap.dot(&ac);
+        let ap_dot_ad = ap.dot(&ad);
 
         let zero = Vect::Val::zero();
 
         let ab_check = zero <= ap_dot_ab && ap_dot_ab <= ab.dot(&ab);
-        let ac_check = zero <= ap_dot_ac && ap_dot_ac <= ac.dot(&ac);
+        let ad_check = zero <= ap_dot_ad && ap_dot_ad <= ad.dot(&ad);
 
-        ab_check && ac_check
+        ab_check && ad_check
     }
 
     // Rectangle methods
@@ -535,7 +535,7 @@ impl<Vect : Vector> Shape for PRect<Vect>
 where Vect::Val : Zero + HAdd + HSub + HMul + HPOrd 
 {
     type Val  = Vect::Val;
-    type Vect = Vect;
+    type Vect = Vect::Own;
     type Own  = PRect<Vect::Own>;
 
     impl_shape!(PRect<Vect>);
@@ -545,7 +545,7 @@ impl<Vect : Vector> Shape for VRect<Vect>
 where Vect::Val : Zero + HAdd + HSub + HMul + HPOrd
 {
     type Val  = Vect::Val;
-    type Vect = Vect;
+    type Vect = Vect::Own;
     type Own  = VRect<Vect::Own>;
 
     impl_shape!(VRect<Vect>);

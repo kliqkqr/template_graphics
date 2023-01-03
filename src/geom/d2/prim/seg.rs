@@ -123,13 +123,14 @@ pub trait Segment {
         let [o_a, o_ab] = other.vects();
 
         let div = o_ab.indep_det(&s_ab)?;
-        let r   = o_ab.det(&o_a) + s_a.det(&o_ab) / div;
+        let r   = (o_ab.det(&o_a) + s_a.det(&o_ab)) / div;
+        let s   = (s_a.x() + r * s_ab.x() - o_a.x()) / o_ab.x();
 
         let zero = Self::Val::zero();
         let one  = Self::Val::one();
 
-        match r.inc_in(zero, one) {
-            true  => {
+        match r.inc_in(zero, one) && s.inc_in(zero, one) {
+            true => {
                 let p = s_a.add(s_ab.vmul(r));
                 Some(p)
             },
@@ -149,12 +150,13 @@ pub trait Segment {
         let [o_a, o_ab] = other.vects();
 
         let div = o_ab.indep_det_eps(&s_ab, eps)?;
-        let r   = o_ab.det(&o_a) + s_a.det(&o_ab) / div;
+        let r   = (o_ab.det(&o_a) + s_a.det(&o_ab)) / div;
+        let s   = (s_a.x() + r * s_ab.x() - o_a.x()) / o_ab.x();
 
         let zero = Self::Val::zero();
         let one  = Self::Val::one();
 
-        match r.inc_in(zero, one) {
+        match r.inc_in(zero, one) && s.inc_in(zero, one) {
             true  => {
                 let p = s_a.add(s_ab.vmul(r));
                 Some(p)

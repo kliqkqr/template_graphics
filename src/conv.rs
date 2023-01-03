@@ -1,14 +1,3 @@
-/// trait for easy / fast conversions
-pub trait Easy<A> {
-    /// easy / fast conversion
-    fn easy(self) -> A;
-}
-
-/// trait for duplicating values from reference 
-pub trait Dup {
-    fn dup(&self) -> Self;
-}
-
 /// trait for conversion from A to Self
 pub trait Of<A> {
     fn of(_ : A) -> Self;
@@ -19,37 +8,31 @@ pub trait To<A> {
     fn to(self) -> A;
 }
 
-/// trait for conversion from Self to &A
-pub trait Ref<A> {
-    fn r(&self) -> &A;
+pub trait Cast<A> {
+    fn cast(self) -> A;
 }
 
-impl<A : std::convert::From<B>, B> Of<B> for A {
-    fn of(b : B) -> Self {
-        <A as std::convert::From<B>>::from(b)
-    }
-}
-
-impl<A, B> To<B> for A where B : Of<A> {
+impl<A, B : Of<A>> To<B> for A {
     fn to(self) -> B {
         B::of(self)
     }
-}
+} 
 
-impl<A : Clone> Dup for A {
-    fn dup(&self) -> Self {
-        self.clone()
-    }
-}
-
-impl<A> Ref<A> for A {
-    fn r(&self) -> &A {
-        &self
-    }
-}
-
-impl<'a, A> Ref<A> for &'a A {
-    fn r(&self) -> &A {
+impl<A> Cast<A> for A {
+    fn cast(self) -> A {
         self
     }
 }
+
+macro_rules! impl_cast {
+    (from $From:ty, to $To:ty) => {
+        impl Cast<$To> for $From {
+            fn cast(self) -> $To {
+                self as $To
+            }
+        }
+    };
+}
+
+impl_cast!(from f32, to u32);
+impl_cast!(from u32, to f32);

@@ -13,6 +13,7 @@ use crate::conv::{
 use crate::num::{
     Zero,
     One,
+    Two,
     Float
 };
 
@@ -69,6 +70,20 @@ pub trait Vector {
         [self.x(), self.y()]
     }
 
+    /// check if vectors are equal
+    fn equal<V : Vector<Val = Self::Val>>(&self, other : V) -> bool 
+    where Self::Val : HPEq
+    {
+        self.x() == other.x() && self.y() == other.y()
+    }
+
+    fn to<V>(&self) -> V 
+    where Self : Sized,
+          V    : Vector<Val = Self::Val, Own = V>
+    {
+        V::of(self)
+    }
+
     /// length of float vector
     fn len(&self) -> Self::Val 
     where Self::Val : Float
@@ -90,7 +105,7 @@ pub trait Vector {
     where Self::Val : HAdd 
     {
         let x = self.x() + other.x();
-        let y = self.x() + other.y();
+        let y = self.y() + other.y();
 
         Self::of((x, y))
     } 
@@ -176,7 +191,7 @@ pub trait Vector {
     }
 
     /// map function over vector values and convert Self to some other Vector
-    fn map<A : Copy, F : Fn(Self::Val) -> A, V : Vector<Val = A, Own = V>>(&self, func : F) -> V {
+    fn map<V : Vector<Own = V>, F : Fn(Self::Val) -> V::Val>(&self, func : F) -> V {
         let x = func(self.x());
         let y = func(self.y());
 
@@ -259,8 +274,8 @@ pub trait Vector {
         let det  = self.det(other); 
 
         match det == zero {
-            false => None,
-            true  => Some(det)
+            false => Some(det),
+            true  => None
         }
     } 
 
@@ -272,10 +287,39 @@ pub trait Vector {
         let det  = self.det(other); 
 
         match det.inc_in(zero - eps, zero + eps) {
-            false => None,
-            true  => Some(det)
+            false => Some(det),
+            true  => None
         }
     }    
+
+    /// checks if other vector is left or right of self
+    fn left<V : Vector<Val = Self::Val>>(&self, other : V) -> bool 
+    where Self::Val : Zero + HSub + HMul + HPOrd
+    {    
+        self.det(other) > Self::Val::zero()
+    } 
+
+    /// angle between two vectors of floats
+    fn angle<V : Vector<Val = Self::Val>>(&self, other : V) -> Self::Val 
+    where Self::Val : Float 
+    {
+        let dot = self.dot(&other);
+        let div = self.len() * other.len();
+
+        (dot / div).acos()
+    }
+
+    /// left angle of self vector to other vector
+    fn angle_l<V : Vector<Val = Self::Val>>(&self, other : V) -> Self::Val 
+    where Self::Val : Zero + Two + Float + HSub + HMul + HPOrd
+    {
+        let angle = self.angle(&other);
+
+        match self.left(other) {
+            false => Self::Val::two() * Self::Val::pi() - angle,
+            true  => angle 
+        }
+    } 
 }
 
 impl<'a, Vect : Vector> Vector for &'a Vect {
@@ -295,7 +339,7 @@ impl<'a, Vect : Vector> Vector for &'a Vect {
     }
 }
 
-impl<Val : Copy> Vector for Vect<Val> {
+impl<Val : Copy> Vector for (Val, Val) {
     type Val = Val;
     type Own = (Val, Val);
 
