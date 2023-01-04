@@ -1,5 +1,5 @@
 use tg::test;
 
 fn main() {
-    let _ = test::ing_seg_mesh_rrcontour();
+    let _ = test::ind_seg_mesh_contour_to_svg();
 }

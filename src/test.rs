@@ -1,6 +1,9 @@
 use image::*;
 
+use svg;
+
 use crate::draw::rast::*;
+use crate::draw::vect::*;
 
 use crate::file::stl::*;
 
@@ -260,7 +263,6 @@ pub fn ing_seg_mesh_rrcontour() -> std::io::Result<()> {
     //     draw_seg_float(&mut image, ab, red, width + 4f32);
     // }
 
-
     // horizontal_flip(&mut image);
 
     // let save_path = format!("rrcontour.bmp");
@@ -271,6 +273,94 @@ pub fn ing_seg_mesh_rrcontour() -> std::io::Result<()> {
     // for (i, v) in contour.iter().enumerate() {
     //     println!("[{:0width$}] x = {}; y = {};", i + 1, v.x(), v.y(), width = 4);
     // }
+
+    Ok(())
+}
+
+pub fn ind_seg_mesh_to_svg() -> std::io::Result<()> {
+    let stl_path = r#"C:\OneDrive\Code\Bachelor\Utah_teapot_(solid).stl"#;
+    let stl = Stl::read_binary(stl_path)?;
+
+    let mesh = IndSegMesh::from_stl(&stl);
+    let mut mesh = mesh.proj_2d(|vertex| (vertex.x() as f64, vertex.z() as f64)).deduplicate();
+
+    let segments = mesh.segments().iter().map(|iseg| mesh.point_segment(iseg));
+    let path = draw_segments_to_path(segments);
+
+    let svg = svg::Document::new()
+        .add(path);
+
+    svg::save("ind_seg_mesh_to_svg.svg", &svg).unwrap();
+
+    Ok(())
+}
+
+pub fn ind_seg_mesh_contour_to_svg() -> std::io::Result<()> {
+    let stl_path = r#"C:\OneDrive\Code\Bachelor\Utah_teapot_(solid).stl"#;
+    let stl = Stl::read_binary(stl_path)?;
+
+    let mesh = IndSegMesh::from_stl(&stl);
+    let mut mesh = mesh.proj_2d(|vertex| (vertex.x() as f64, vertex.z() as f64)).deduplicate();
+
+    let bounds = mesh.bounds();
+    let viewbox = (5_000f64, 5_000f64);
+
+    let scales = viewbox.div(bounds.size());
+    let scale = f64::min(scales.x(),scales.y());
+
+    mesh.add_mut(bounds.start().neg());
+    mesh.vmul_mut(scale);
+
+    let mesh_paths = mesh.segments().iter()
+        .map(|iseg| {
+            let segment =  mesh.point_segment(iseg);
+            draw_segment_to_path(segment)
+                .set("stroke", "black")
+                .set("stroke-width", "0.02")
+                .set("id", format!("mesh-{}-{}", iseg.a(), iseg.b()))
+        });
+
+    let mut svg = svg::Document::new();
+
+    for mesh_path in mesh_paths {
+        svg = svg.add(mesh_path)
+    }
+
+    let max = 200;
+
+    let contour = mesh.rrcontour(max).unwrap();
+
+    for j in 0..(contour.len() - 1) {
+        let mut svg = svg.clone();
+
+        for i in 0..j {
+            let a = contour[i];
+            let b = contour[i + 1];
+    
+            let data = svg::node::element::path::Data::new()
+                .move_to((a.x(), a.y()))
+                .line_to((b.x(), b.y()));
+    
+            let stroke = if i == j - 1 { "green" } else { "red" };
+    
+            let path = svg::node::element::Path::new()
+                .set("d", data)
+                .set("stroke", stroke)
+                .set("stroke-width", "0.03")
+                .set("id", format!("contour-{}", i));
+
+                svg = svg.add(path);
+        }
+
+        let svg_path = format!("rrcontour_svg_examples\\{}.svg", j);
+        svg::save(svg_path, &svg).unwrap();
+    }
+
+    println!("\n\ncontour");
+
+    for (i, v) in contour.iter().enumerate() {
+        println!("[{:0width$}] x = {}; y = {};", i, v.x(), v.y(), width = 4);
+    }
 
     Ok(())
 }
