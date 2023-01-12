@@ -25,7 +25,7 @@ use crate::geom::d3::prim::vect::{
     Vector as Vector3
 };
 
-use crate::geom::d3::mesh::rind::{
+use crate::geom::d3::mesh::ind::{
     IndSegMesh
 };
 
