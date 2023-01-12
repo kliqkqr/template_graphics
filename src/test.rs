@@ -1,3 +1,5 @@
+use std::fmt::format;
+
 use image::*;
 
 use svg;
@@ -303,7 +305,7 @@ pub fn ind_seg_mesh_contour_to_svg() -> std::io::Result<()> {
     let mut mesh = mesh.proj_2d(|vertex| (vertex.x() as f64, vertex.z() as f64)).deduplicate();
 
     let bounds = mesh.bounds();
-    let viewbox = (5_000f64, 5_000f64);
+    let viewbox = (200f64, 200f64);
 
     let scales = viewbox.div(bounds.size());
     let scale = f64::min(scales.x(),scales.y());
@@ -326,11 +328,11 @@ pub fn ind_seg_mesh_contour_to_svg() -> std::io::Result<()> {
         svg = svg.add(mesh_path)
     }
 
-    let max = 200;
+    let max = 500;
 
     let contour = mesh.rrcontour(max).unwrap();
 
-    for j in 0..(contour.len() - 1) {
+    for j in 0..contour.len() {
         let mut svg = svg.clone();
 
         for i in 0..j {
@@ -359,7 +361,100 @@ pub fn ind_seg_mesh_contour_to_svg() -> std::io::Result<()> {
     println!("\n\ncontour");
 
     for (i, v) in contour.iter().enumerate() {
-        println!("[{:0width$}] x = {}; y = {};", i, v.x(), v.y(), width = 4);
+        match contour[..i].iter().position(|vect| vect.equal(v)) {
+            None => println!("[{:0width$}] x = {}; y = {};", i, v.x(), v.y(), width = 4),
+            Some(index) => println!("[{:0width$}] x = {}; y = {}; error {}", i, v.x(), v.y(), index, width = 4)
+        }
+    }
+
+    Ok(())
+}
+
+pub fn mesh_2d_contour() -> std::io::Result<()> {
+    let stl_path = r#"C:\OneDrive\Code\Bachelor\Utah_teapot_(solid).stl"#;
+    let stl = Stl::read_binary(stl_path)?;
+
+    let mesh = IndSegMesh::from_stl(&stl);
+    let mesh = mesh.proj_2d(|vertex| (vertex.x() as f64, vertex.z() as f64)).deduplicate();
+
+    let max = 200;
+
+    let contour = mesh.rrcontour(max).unwrap();
+
+    println!("\n\ncontour");
+
+    for (i, v) in contour.iter().enumerate() {
+        match contour[..i].iter().position(|vect| vect.equal(v)) {
+            None => println!("[{:0width$}] x = {}; y = {};", i, v.x(), v.y(), width = 4),
+            Some(index) => println!("[{:0width$}] x = {}; y = {}; error {}", i, v.x(), v.y(), index, width = 4)
+        }
+    }
+
+    Ok(())
+}
+
+pub fn template_mesh_2d_contour() -> std::io::Result<()> {
+    // let stl_paths = vec![
+    //     r#"C:\OneDrive\Code\Bachelor\models\stl\LINK SP-CL 3D\177-200_26.stl"#,
+    //     r#"C:\OneDrive\Code\Bachelor\models\stl\LINK SP-CL 3D\177-201_26.stl"#,
+    //     r#"C:\OneDrive\Code\Bachelor\models\stl\LINK SP-CL 3D\177-202_26.stl"#,
+    //     r#"C:\OneDrive\Code\Bachelor\models\stl\LINK SP-CL 3D\177-203_26.stl"#,
+    //     r#"C:\OneDrive\Code\Bachelor\models\stl\LINK SP-CL 3D\177-204_26.stl"#,
+    // ];
+
+    let stl_paths = vec![
+        // r#"C:\OneDrive\Code\Bachelor\simple_bunny.stl"#,
+        // r#"C:\OneDrive\Code\Bachelor\simple_teapod_82.stl"#,
+        r#"C:\OneDrive\Code\Bachelor\Stanford_Bunny_sample.stl"#,
+        r#"C:\OneDrive\Code\Bachelor\Utah_teapot_(solid).stl"#,
+    ];
+
+    for (index, stl_path) in stl_paths.iter().enumerate() {
+        println!("{}", stl_path);
+
+        let stl = Stl::read_binary(stl_path)?;
+
+        let mesh = IndSegMesh::from_stl(&stl);
+        let mut mesh = mesh.proj_2d(|vertex| (vertex.x() as f64, vertex.z() as f64)).deduplicate();
+    
+        let bounds = mesh.bounds();
+        let viewbox = (1000f64, 1000f64);
+    
+        let scales = viewbox.div(bounds.size());
+        let scale = f64::min(scales.x(),scales.y());
+    
+        mesh.add_mut(bounds.start().neg());
+        mesh.vmul_mut(scale);
+
+        let contour = mesh.rrcontour(50_000).unwrap();
+
+        let segments = mesh.segments().iter().map(|iseg| mesh.point_segment(iseg));
+        let mesh_path = draw_segments_to_path(segments)
+            .set("stroke", "black")
+            .set("stroke-width", "0.2");
+
+        let mut contour_data = svg::node::element::path::Data::new();
+
+        for index in 0..contour.len() {
+            let a = contour[index];
+            let b = contour[(index + 1) % contour.len()];
+
+            contour_data = contour_data
+                .move_to((a.x(), a.y()))
+                .line_to((b.x(), b.y()));
+        }
+
+        let contour_path = svg::node::element::Path::new()
+            .set("stroke", "red")
+            .set("stroke-width", "2")
+            .set("d", contour_data);
+
+        let svg = svg::Document::new()
+            .add(mesh_path)
+            .add(contour_path);
+
+        let svg_path = format!("template_contours\\{}.svg", index);
+        svg::save(svg_path, &svg).unwrap();
     }
 
     Ok(())

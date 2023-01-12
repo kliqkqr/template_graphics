@@ -253,7 +253,7 @@ impl<Vect : Vector> IndSegMesh<Vect> {
         let mut contour = vec![last_vertex, curr_vertex];
 
         loop {
-            println!("last_index = {:?};", last_index);
+            // println!("last_index = {:?};", last_index);
 
             let last_vertex = &contour[contour.len() - 2];
             let curr_vertex = &contour[contour.len() - 1];
@@ -375,35 +375,40 @@ impl<Vect : Vector> IndSegMesh<Vect> {
         // contour that is returned at end
         let mut contour = vec![Vect::of(first_vertex)];
 
+        let mut index = 0;
+
         // loop until last found vertix is first vertex
         loop {
-            let mut commands : Vec<String> = Vec::new();
+            // // Remove: Debug
+            // println!("search = {}", contour.len());
+            // let mut geogebra_commands = Vec::new();
+            // let mut geogebra_adjacent_vertices = Vec::new();
+            // let mut geogebra_adjacent_segments = Vec::new();
+            // let mut geogebra_intersection_vertices_left = Vec::new();
+            // let mut geogebra_intersection_vertices_right = Vec::new();
+            // let mut geogebra_intersection_intersections = Vec::new();
+            // let mut geogebra_intersection_segments = Vec::new();
 
-            let vs = |v : Vect::Own| format!("({:?}, {:?})", v.x(), v.y());
+            if index > 10000 {
+                println!("10000");
+                index = 0;
+            }
+
+            index += 1;
 
             let last_vertex    = &step.last_vertex;
             let current_vertex = &step.current_vertex;
-
-            let cmd = format!("L = {}", vs(Vect::of(last_vertex)));
-            commands.push(cmd);
-
-            let cmd = format!("C = {}", vs(Vect::of(current_vertex)));
-            commands.push(cmd);
 
             // vector from current vertex to last vertex
             let current_last_vector = last_vertex.sub(current_vertex);
 
             let adjacent_index = match step.origin {
-                ContourStepOrigin::Mesh { current_index } => {
-                    let mut index = 0;
-
+                ContourStepOrigin::Mesh{current_index} => {
                     // result from adjacent vertex loop
                     let mut adjacent_result_option = None;
 
                     // iterate over all adjacent vertices to find vertex with smallest left angle to current_last_vector
                     for adjacent_vertex_index in self.adjacent_vertex_indecis(current_index) {  
-                        index += 1;
-
 
                         // ignore last found adjacent vertex
                         if step.last_right_index == adjacent_vertex_index {
@@ -412,6 +417,10 @@ impl<Vect : Vector> IndSegMesh<Vect> {
 
                         // vertex adjacent to current vertex
                         let adjacent_vertex = self.vertex(adjacent_vertex_index);
+
+                        // // REMOVE: Debug
+                        // geogebra_adjacent_vertices.push(format!("({:?}, {:?})", adjacent_vertex.x(), adjacent_vertex.y()));
+                        // geogebra_adjacent_segments.push(format!("Segment(C, As({}))", geogebra_adjacent_vertices.len()));
 
                         // vector from current vertex to adjacent vertex
                         let current_adjacent_vector = adjacent_vertex.sub(current_vertex);
@@ -427,12 +436,6 @@ impl<Vect : Vector> IndSegMesh<Vect> {
                             length : None
                         };
 
-                        let cmd = format!("A{} = {}", index, vs(Vect::of(&adjacent_vertex)));
-                        commands.push(cmd);
-
-                        let cmd = format!("A{}S = Segment(C, A{})", index, index);
-                        commands.push(cmd);
-
                         // update result option with result with smaller angle / smaller vector length if angles are equal
                         adjacent_result_option = match adjacent_result_option {
                             None => Some(result),
@@ -444,17 +447,6 @@ impl<Vect : Vector> IndSegMesh<Vect> {
                 },
                 ContourStepOrigin::Intersection{left_index, ..} => left_index,
             };
-
-            let mut index = 0;
-
-            let cmd = format!("A = {}", vs(Vect::of(self.vertex(adjacent_index))));
-            commands.push(cmd);
-
-            let cmd = format!("L'C = Segment(L, C)");
-            commands.push(cmd);
-
-            let cmd = format!("C'A = Segment(C, A)");
-            commands.push(cmd);
 
             // adjacent vertex
             let adjacent_vertex = self.vertex(adjacent_index);
@@ -494,9 +486,17 @@ impl<Vect : Vector> IndSegMesh<Vect> {
                 // point segment defined by indexed segment
                 let point_segment = self.point_segment(indexed_segment);
 
+                // Change
+                // let intersection_optional = match current_adjacent_segment.intsec(&point_segment) {
+                //     Some(intersection) => Some(intersection),
+                //     None => point_segment.intsec(&current_adjacent_segment)
+                // };
+
                 // check if segment between current vertex and adjacent result vertex intersects the segment
                 if let Some(intersection) = current_adjacent_segment.intsec(&point_segment) {
-                    index += 1;
+
+                // Change
+                // if let Some(intersection) = intersection_optional {
 
                     // vector from current vertex to intersection vertex
                     let current_intersection_vector = intersection.sub(current_vertex);
@@ -522,34 +522,21 @@ impl<Vect : Vector> IndSegMesh<Vect> {
                         true  => (indexed_segment.a(), point_segment.a(), indexed_segment.b(), point_segment.b())
                     };
 
-                    let adjacent_left_vector = left_vertex.sub(adjacent_vertex);
-
-                    let is_left = adjacent_current_vector.left(adjacent_left_vector);
-
-                    match step.origin {
-                        ContourStepOrigin::Mesh { current_index } => {
-                            println!("last mesh last = {}; curr = {}; adj = {}; seg_a = {}; seg_b = {}; a_ang = {:?}; b_ang = {:?}; is_left = {};", step.last_right_index, current_index, adjacent_index, indexed_segment.a(),indexed_segment.b(), left_a_angle, left_b_angle, is_left)
-                        },
-                        ContourStepOrigin::Intersection { last_left_index, right_index, left_index } => {
-                            println!("curr ints l'r = {}; l'l = {}; r = {}; l = {}; adj = {}; seg_a = {}; seg_b = {}; a_ang = {:?}; b_ang = {:?}; is_left = {};", step.last_right_index, last_left_index, right_index, left_index, adjacent_index, indexed_segment.a(),indexed_segment.b(), left_a_angle, left_b_angle, is_left)
-                        },
-                    }
-
-                    let cmd = format!("S{}L = {}", index, vs(Vect::of(self.vertex(left_index))));
-                    commands.push(cmd);
-
-                    let cmd = format!("S{}R = {}", index, vs(Vect::of(self.vertex(right_index))));
-                    commands.push(cmd);
-
-                    let cmd = format!("S{}I = {}", index, vs(Vect::of(&intersection)));
-                    commands.push(cmd);
-
-                    let cmd = format!("S{} = Segment(S{}L, S{}R)", index, index, index);
-                    commands.push(cmd);
-
-                    if !is_left {
+                    // Change
+                    let intersection_adjacent_vector = adjacent_vertex.sub(&intersection);
+                    let intersection_left_vector = left_vertex.sub(&intersection);
+                    let adjacent_angle = current_last_vector.angle_l(intersection_adjacent_vector);
+                    let left_angle = current_last_vector.angle_l(intersection_left_vector);
+                    if adjacent_angle <= left_angle {
                         continue;
                     }
+
+                    // // Remove: Debug
+                    // geogebra_intersection_vertices_left.push(format!("({:?}, {:?})", left_vertex.x(), left_vertex.y()));
+                    // geogebra_intersection_vertices_right.push(format!("({:?}, {:?})", right_vertex.x(), right_vertex.y()));
+                    // geogebra_intersection_intersections.push(format!("({:?}, {:?})", intersection.x(), intersection.y()));
+                    // geogebra_intersection_segments.push(format!("Segment(Ls({:?}), Rs({:?}))", 
+                    //     geogebra_intersection_vertices_left.len(), geogebra_intersection_vertices_left.len()));
 
                     // create intersection result
                     let result = ContourIntersectionResult {
@@ -568,28 +555,108 @@ impl<Vect : Vector> IndSegMesh<Vect> {
                     };
                 }
             }
-            
-            // rlast = rcurrent;
 
+            // // Change
+            // intersection_result_option = match intersection_result_option {
+            //     None => None,
+            //     Some(intersection_result) => {
+            //         // let intersection_adjacent_vector = intersection_result.intersection.sub(&adjacent_vertex);
+            //         // let intersection_left_vector = intersection_result.intersection.sub(&intersection_result.left_vertex);
+
+            //         let intersection_adjacent_vector = adjacent_vertex.sub(&intersection_result.intersection);
+            //         let intersection_left_vector = intersection_result.left_vertex.sub(&intersection_result.intersection);
+
+            //         println!("adj_vertex = ({:?}, {:?}); left_vertex = ({:?}, {:?});", 
+            //         adjacent_vertex.x(), adjacent_vertex.y(), 
+            //         intersection_result.left_vertex.x(), intersection_result.left_vertex.y());
+
+            //         println!("intsec_adj_vector = ({:?}, {:?}); intsec_left_vector = ({:?}, {:?});", 
+            //             intersection_adjacent_vector.x(), intersection_adjacent_vector.y(), 
+            //             intersection_left_vector.x(), intersection_left_vector.y());
+
+            //         let adjacent_angle = current_last_vector.angle_l(intersection_adjacent_vector);
+            //         let left_angle = current_last_vector.angle_l(intersection_left_vector);
+
+            //         let change = match adjacent_angle <= left_angle {
+            //             false => Some(intersection_result),
+            //             true  => None
+            //         };
+
+            //         if change.is_none() {
+            //             println!("changed adjacent_angle = {:?}; left_angle = {:?};", adjacent_angle, left_angle);
+            //         }
+
+            //         change
+            //     }
+            // };
+
+            // // Remove: Debug
+            // let command = format!("index = {}", contour.len());
+            // geogebra_commands.push(command);
+            // let command = format!("P = ({:?}, {:?})", last_vertex.x(), last_vertex.y());
+            // geogebra_commands.push(command);
+            // let command = format!("C = ({:?}, {:?})", current_vertex.x(), current_vertex.y());
+            // geogebra_commands.push(command);
+            // let command = format!("PC = Segment(P, C)");
+            // geogebra_commands.push(command);
+            // let command = format!("As = {{{}}}", geogebra_adjacent_vertices.join(", "));
+            // geogebra_commands.push(command);
+            // let command = format!("ASs = {{{}}}", geogebra_adjacent_segments.join(", "));
+            // geogebra_commands.push(command);
+            // let command = format!("A = ({:?}, {:?})", adjacent_vertex.x(), adjacent_vertex.y());
+            // geogebra_commands.push(command);
+            // let command = format!("CA = Segment(C, A)");
+            // geogebra_commands.push(command);
+            // let command = format!("Ls = {{{}}}", geogebra_intersection_vertices_left.join(", "));
+            // geogebra_commands.push(command);
+            // let command = format!("Rs = {{{}}}", geogebra_intersection_vertices_right.join(", "));
+            // geogebra_commands.push(command);
+            // let command = format!("Is = {{{}}}", geogebra_intersection_intersections.join(", "));
+            // geogebra_commands.push(command);
+            // let command = format!("ISs = {{{}}}", geogebra_intersection_segments.join(", "));
+            // geogebra_commands.push(command);
+            
             // update loop variables according to found results
             if let Some(intersection_result) = intersection_result_option {
-                println!("contour.len = {:?}; intersection;", contour.len() + 1);
-                println!("intersection = {}", vs(Vect::of(&intersection_result.intersection)));
-                commands.iter_mut().for_each(|cmd| *cmd = format!("\"{}\"", cmd));
-                let str = commands.join(", ");
-                println!("Execute[{{{}}}]\n\n", str);
-
 
                 let last_right_index = match step.origin {
                     ContourStepOrigin::Mesh{current_index} => current_index,
                     ContourStepOrigin::Intersection{right_index, ..} => right_index,
                 };
 
+                // match &intersection_result {
+                //     ContourIntersectionResult { intersection, distance, left_vertex, left_index, right_vertex, right_index } => {
+                //         println!("left_index = {}; right_index = {};", left_index, right_index)
+                //     }
+                // }
+
+                // match &step {
+                //     ContourStep { last_right_index, last_vertex, current_vertex, origin } => match origin {
+                //         ContourStepOrigin::Mesh { current_index } => {
+                //             println!("step_last_right_index = {}; step_current_index = {};", last_right_index, current_index);
+                //         },
+                //         ContourStepOrigin::Intersection { last_left_index, right_index, left_index } => {
+                //             println!("step_left_index = {}; step_right_index = {};", left_index, right_index);
+                //             println!("step_last_left_index = {}; step_last_right_index = {};", last_left_index, last_right_index)
+                //         }
+                //     }
+                // }
+
+                // // Remove: Debug
+                // let command = format!("L = ({:?}, {:?})", intersection_result.left_vertex.x(), intersection_result.left_vertex.y());
+                // geogebra_commands.push(command);
+                // let command = format!("R = ({:?}, {:?})", intersection_result.right_vertex.x(), intersection_result.right_vertex.y());
+                // geogebra_commands.push(command);
+                // let command = format!("I = ({:?}, {:?})", intersection_result.intersection.x(), intersection_result.intersection.y());
+                // geogebra_commands.push(command);
+                // let command = format!("IS = Segment(L, R)");
+                // geogebra_commands.push(command);
+
                 step = ContourStep {
                     last_right_index : last_right_index,
                     last_vertex      : step.current_vertex,
                     current_vertex   : intersection_result.intersection,
-                    origin: ContourStepOrigin::Intersection {
+                    origin           : ContourStepOrigin::Intersection {
                         last_left_index : adjacent_index,
                         right_index     : intersection_result.right_index,
                         left_index      : intersection_result.left_index,
@@ -597,12 +664,6 @@ impl<Vect : Vector> IndSegMesh<Vect> {
                 }
             }
             else {
-                println!("contour.len = {:?}; adjacent;", contour.len() + 1);
-                println!("adjacent = {}", vs(Vect::of(&adjacent_vertex)));
-                commands.iter_mut().for_each(|cmd| *cmd = format!("\"{}\"", cmd));
-                let str = commands.join(", ");
-                println!("Execute[{{{}}}]\n\n", str);
-
                 let last_right_index = match step.origin {
                     ContourStepOrigin::Mesh{current_index} => current_index,
                     ContourStepOrigin::Intersection{right_index, ..} => right_index,
@@ -612,9 +673,14 @@ impl<Vect : Vector> IndSegMesh<Vect> {
                     last_right_index : last_right_index,
                     last_vertex      : step.current_vertex,
                     current_vertex   : Vect::of(self.vertex(adjacent_index)),
-                    origin: ContourStepOrigin::Mesh{current_index : adjacent_index}
+                    origin           : ContourStepOrigin::Mesh {
+                        current_index : adjacent_index
+                    }
                 }
             }
+
+            // // Remove: Debug
+            // println!("Execute[{{{}}}]\n\n", geogebra_commands.iter().map(|cmd| format!("\"{}\"", cmd)).collect::<Vec<String>>().join(", "));
 
             if contour[0].equal(&step.current_vertex) {
                 break;
