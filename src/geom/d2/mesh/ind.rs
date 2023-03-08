@@ -2,8 +2,6 @@ use std::vec::{
     Vec
 };
 
-use rand::seq::index;
-
 use crate::geom::d2::prim::{
     Segment
 };
@@ -54,6 +52,17 @@ struct ContourIntersectionResult<Vect : Vector> {
     left_index   : usize,
     right_vertex : Vect,
     right_index  : usize
+}
+
+enum RCurrentVertexOrigin {
+    Mesh{current_vertex_index : usize},
+    Intersection{}
+}
+
+struct RContourStep<Vect : Vector> {
+    last_vertex           : Vect,
+    current_vertex        : Vect,
+    current_vertex_origin : RCurrentVertexOrigin
 }
 
 enum ContourStepOrigin {
@@ -379,22 +388,22 @@ impl<Vect : Vector> IndSegMesh<Vect> {
 
         // loop until last found vertix is first vertex
         loop {
-            // // Remove: Debug
-            // println!("search = {}", contour.len());
-            // let mut geogebra_commands = Vec::new();
-            // let mut geogebra_adjacent_vertices = Vec::new();
-            // let mut geogebra_adjacent_segments = Vec::new();
-            // let mut geogebra_intersection_vertices_left = Vec::new();
-            // let mut geogebra_intersection_vertices_right = Vec::new();
-            // let mut geogebra_intersection_intersections = Vec::new();
-            // let mut geogebra_intersection_segments = Vec::new();
+            // Remove: Debug
+            println!("search = {}", contour.len());
+            let mut geogebra_commands = Vec::new();
+            let mut geogebra_adjacent_vertices = Vec::new();
+            let mut geogebra_adjacent_segments = Vec::new();
+            let mut geogebra_intersection_vertices_left = Vec::new();
+            let mut geogebra_intersection_vertices_right = Vec::new();
+            let mut geogebra_intersection_intersections = Vec::new();
+            let mut geogebra_intersection_segments = Vec::new();
 
-            if index > 10000 {
-                println!("10000");
-                index = 0;
-            }
+            // if index > 10000 {
+            //     println!("10000");
+            //     index = 0;
+            // }
 
-            index += 1;
+            // index += 1;
 
             let last_vertex    = &step.last_vertex;
             let current_vertex = &step.current_vertex;
@@ -418,9 +427,9 @@ impl<Vect : Vector> IndSegMesh<Vect> {
                         // vertex adjacent to current vertex
                         let adjacent_vertex = self.vertex(adjacent_vertex_index);
 
-                        // // REMOVE: Debug
-                        // geogebra_adjacent_vertices.push(format!("({:?}, {:?})", adjacent_vertex.x(), adjacent_vertex.y()));
-                        // geogebra_adjacent_segments.push(format!("Segment(C, As({}))", geogebra_adjacent_vertices.len()));
+                        // REMOVE: Debug
+                        geogebra_adjacent_vertices.push(format!("({:?}, {:?})", adjacent_vertex.x(), adjacent_vertex.y()));
+                        geogebra_adjacent_segments.push(format!("Segment(C, As({}))", geogebra_adjacent_vertices.len()));
 
                         // vector from current vertex to adjacent vertex
                         let current_adjacent_vector = adjacent_vertex.sub(current_vertex);
@@ -531,12 +540,12 @@ impl<Vect : Vector> IndSegMesh<Vect> {
                         continue;
                     }
 
-                    // // Remove: Debug
-                    // geogebra_intersection_vertices_left.push(format!("({:?}, {:?})", left_vertex.x(), left_vertex.y()));
-                    // geogebra_intersection_vertices_right.push(format!("({:?}, {:?})", right_vertex.x(), right_vertex.y()));
-                    // geogebra_intersection_intersections.push(format!("({:?}, {:?})", intersection.x(), intersection.y()));
-                    // geogebra_intersection_segments.push(format!("Segment(Ls({:?}), Rs({:?}))", 
-                    //     geogebra_intersection_vertices_left.len(), geogebra_intersection_vertices_left.len()));
+                    // Remove: Debug
+                    geogebra_intersection_vertices_left.push(format!("({:?}, {:?})", left_vertex.x(), left_vertex.y()));
+                    geogebra_intersection_vertices_right.push(format!("({:?}, {:?})", right_vertex.x(), right_vertex.y()));
+                    geogebra_intersection_intersections.push(format!("({:?}, {:?})", intersection.x(), intersection.y()));
+                    geogebra_intersection_segments.push(format!("Segment(Ls({:?}), Rs({:?}))", 
+                        geogebra_intersection_vertices_left.len(), geogebra_intersection_vertices_left.len()));
 
                     // create intersection result
                     let result = ContourIntersectionResult {
@@ -590,31 +599,31 @@ impl<Vect : Vector> IndSegMesh<Vect> {
             //     }
             // };
 
-            // // Remove: Debug
-            // let command = format!("index = {}", contour.len());
-            // geogebra_commands.push(command);
-            // let command = format!("P = ({:?}, {:?})", last_vertex.x(), last_vertex.y());
-            // geogebra_commands.push(command);
-            // let command = format!("C = ({:?}, {:?})", current_vertex.x(), current_vertex.y());
-            // geogebra_commands.push(command);
-            // let command = format!("PC = Segment(P, C)");
-            // geogebra_commands.push(command);
-            // let command = format!("As = {{{}}}", geogebra_adjacent_vertices.join(", "));
-            // geogebra_commands.push(command);
-            // let command = format!("ASs = {{{}}}", geogebra_adjacent_segments.join(", "));
-            // geogebra_commands.push(command);
-            // let command = format!("A = ({:?}, {:?})", adjacent_vertex.x(), adjacent_vertex.y());
-            // geogebra_commands.push(command);
-            // let command = format!("CA = Segment(C, A)");
-            // geogebra_commands.push(command);
-            // let command = format!("Ls = {{{}}}", geogebra_intersection_vertices_left.join(", "));
-            // geogebra_commands.push(command);
-            // let command = format!("Rs = {{{}}}", geogebra_intersection_vertices_right.join(", "));
-            // geogebra_commands.push(command);
-            // let command = format!("Is = {{{}}}", geogebra_intersection_intersections.join(", "));
-            // geogebra_commands.push(command);
-            // let command = format!("ISs = {{{}}}", geogebra_intersection_segments.join(", "));
-            // geogebra_commands.push(command);
+            // Remove: Debug
+            let command = format!("index = {}", contour.len());
+            geogebra_commands.push(command);
+            let command = format!("P = ({:?}, {:?})", last_vertex.x(), last_vertex.y());
+            geogebra_commands.push(command);
+            let command = format!("C = ({:?}, {:?})", current_vertex.x(), current_vertex.y());
+            geogebra_commands.push(command);
+            let command = format!("PC = Segment(P, C)");
+            geogebra_commands.push(command);
+            let command = format!("As = {{{}}}", geogebra_adjacent_vertices.join(", "));
+            geogebra_commands.push(command);
+            let command = format!("ASs = {{{}}}", geogebra_adjacent_segments.join(", "));
+            geogebra_commands.push(command);
+            let command = format!("A = ({:?}, {:?})", adjacent_vertex.x(), adjacent_vertex.y());
+            geogebra_commands.push(command);
+            let command = format!("CA = Segment(C, A)");
+            geogebra_commands.push(command);
+            let command = format!("Ls = {{{}}}", geogebra_intersection_vertices_left.join(", "));
+            geogebra_commands.push(command);
+            let command = format!("Rs = {{{}}}", geogebra_intersection_vertices_right.join(", "));
+            geogebra_commands.push(command);
+            let command = format!("Is = {{{}}}", geogebra_intersection_intersections.join(", "));
+            geogebra_commands.push(command);
+            let command = format!("ISs = {{{}}}", geogebra_intersection_segments.join(", "));
+            geogebra_commands.push(command);
             
             // update loop variables according to found results
             if let Some(intersection_result) = intersection_result_option {
@@ -642,15 +651,15 @@ impl<Vect : Vector> IndSegMesh<Vect> {
                 //     }
                 // }
 
-                // // Remove: Debug
-                // let command = format!("L = ({:?}, {:?})", intersection_result.left_vertex.x(), intersection_result.left_vertex.y());
-                // geogebra_commands.push(command);
-                // let command = format!("R = ({:?}, {:?})", intersection_result.right_vertex.x(), intersection_result.right_vertex.y());
-                // geogebra_commands.push(command);
-                // let command = format!("I = ({:?}, {:?})", intersection_result.intersection.x(), intersection_result.intersection.y());
-                // geogebra_commands.push(command);
-                // let command = format!("IS = Segment(L, R)");
-                // geogebra_commands.push(command);
+                // Remove: Debug
+                let command = format!("L = ({:?}, {:?})", intersection_result.left_vertex.x(), intersection_result.left_vertex.y());
+                geogebra_commands.push(command);
+                let command = format!("R = ({:?}, {:?})", intersection_result.right_vertex.x(), intersection_result.right_vertex.y());
+                geogebra_commands.push(command);
+                let command = format!("I = ({:?}, {:?})", intersection_result.intersection.x(), intersection_result.intersection.y());
+                geogebra_commands.push(command);
+                let command = format!("IS = Segment(L, R)");
+                geogebra_commands.push(command);
 
                 step = ContourStep {
                     last_right_index : last_right_index,
@@ -679,8 +688,8 @@ impl<Vect : Vector> IndSegMesh<Vect> {
                 }
             }
 
-            // // Remove: Debug
-            // println!("Execute[{{{}}}]\n\n", geogebra_commands.iter().map(|cmd| format!("\"{}\"", cmd)).collect::<Vec<String>>().join(", "));
+            // Remove: Debug
+            println!("Execute[{{{}}}]\n\n", geogebra_commands.iter().map(|cmd| format!("\"{}\"", cmd)).collect::<Vec<String>>().join(", "));
 
             if contour[0].equal(&step.current_vertex) {
                 break;
@@ -695,6 +704,77 @@ impl<Vect : Vector> IndSegMesh<Vect> {
 
         Some(contour)
     }
+
+
+    // pub fn rrrcontour(&self, max : usize)  -> Option<Vec<Vect::Own>>
+    // where Vect::Val : Float + HPOrd + std::fmt::Debug
+    // {   
+    //     // Result from vertices loop. Contains vertex with min x coordinate and it's index
+    //     let mut first_result_option = None;
+
+    //     // iterator over all vertices to find min x coordinate vertex
+    //     for (vertex_index, vertex) in self.vertices().iter().enumerate() {
+    //         first_result_option = match first_result_option {
+    //             None => Some((vertex_index, vertex)),
+    //             Some((best_vertex_index, best_vertex)) => {
+    //                 match best_vertex.x() <= vertex.x() {
+    //                     false => Some((vertex_index, vertex)),
+    //                     true  => Some((best_vertex_index, best_vertex))
+    //                 }
+    //             }
+    //         }
+    //     }
+
+    //     // return None if mesh contains no vertices
+    //     let (first_vertex_index, first_vertex) = first_result_option?;
+
+    //     // contains all important values for loop step
+    //     let mut step = RContourStep {
+    //         last_vertex           : first_vertex.add((-Vect::Val::one(), Vect::Val::one())),
+    //         current_vertex        : Vect::of(first_vertex),
+    //         current_vertex_origin : RCurrentVertexOrigin::Mesh{current_vertex_index : first_vertex_index}
+    //     };
+
+    //     // contour that is returned
+    //     let mut contour = vec![Vect::of(first_vertex)];
+
+    //     // loop until last vertix is equal to first vertex
+    //     loop {  
+    //         // vector from current vertex to last vertex
+    //         let current_last_vector = step.last_vertex.sub(&step.current_vertex);
+
+    //         let adjacent_vertex_index = match step.current_vertex_origin {
+    //             RCurrentVertexOrigin::Mesh{current_vertex_index} => {
+    //                 let adjacent_result_option = None;
+
+    //                 for adjacent_vertex_index in self.adjacent_vertex_indecis(current_vertex_index) {
+                        
+    //                 }
+    //             },
+    //             RCurrentVertexOrigin::Intersection{} => {
+    //                 todo!()
+    //             }
+    //         };
+
+    //         // // index of adjacent vertex
+    //         // let adjacent_index = match step.origin {
+    //         //     ContourStepOrigin::Mesh{current_index} => {
+    //         //         // result from adjacent vertex loop
+    //         //         let mut adjacent_result_option = None;
+
+    //         //         // iterate over all adjacent vertices to current vertex 
+    //         //         for adjacent_vertex_index in self.adjacent_vertex_indecis(current_index) {
+
+    //         //         }
+    //         //     },
+    //         //     ContourStepOrigin::Intersection{..} => {
+    //         //         todo!()
+    //         //     }
+    //         // };
+    //     }
+
+    //     Some(contour)
+    // }
 
     #[warn(deprecated)]
     pub fn deduplicate(&self) -> IndSegMesh<Vect::Own> 

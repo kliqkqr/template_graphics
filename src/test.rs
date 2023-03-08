@@ -1,5 +1,3 @@
-use std::fmt::format;
-
 use image::*;
 
 use svg;
@@ -298,7 +296,7 @@ pub fn ind_seg_mesh_to_svg() -> std::io::Result<()> {
 }
 
 pub fn ind_seg_mesh_contour_to_svg() -> std::io::Result<()> {
-    let stl_path = r#"C:\OneDrive\Code\Bachelor\Utah_teapot_(solid).stl"#;
+    let stl_path = r#"C:\OneDrive\Code\Bachelor\Stanford_Bunny_sample.stl"#;
     let stl = Stl::read_binary(stl_path)?;
 
     let mesh = IndSegMesh::from_stl(&stl);
@@ -371,15 +369,21 @@ pub fn ind_seg_mesh_contour_to_svg() -> std::io::Result<()> {
 }
 
 pub fn mesh_2d_contour() -> std::io::Result<()> {
-    let stl_path = r#"C:\OneDrive\Code\Bachelor\Utah_teapot_(solid).stl"#;
+    let stl_path = r#"C:\OneDrive\Code\Bachelor\177-204_26_ml.stl"#;
     let stl = Stl::read_binary(stl_path)?;
 
     let mesh = IndSegMesh::from_stl(&stl);
     let mesh = mesh.proj_2d(|vertex| (vertex.x() as f64, vertex.z() as f64)).deduplicate();
 
-    let max = 200;
+    let max = 500;
+
+    let now = std::time::Instant::now();
 
     let contour = mesh.rrcontour(max).unwrap();
+
+    let elapsed = now.elapsed();
+
+    println!("elapsed: {:?}", elapsed);
 
     println!("\n\ncontour");
 
@@ -390,23 +394,42 @@ pub fn mesh_2d_contour() -> std::io::Result<()> {
         }
     }
 
+    let segments = mesh.segments().iter().map(|iseg| mesh.point_segment(iseg));
+    let mesh_path = draw_segments_to_path(segments)
+        .set("stroke", "black")
+        .set("stroke-width", "0.2");
+
+    let mut contour_data = svg::node::element::path::Data::new();
+
+    for index in 0..contour.len() {
+        let a = contour[index];
+        let b = contour[(index + 1) % contour.len()];
+
+        contour_data = contour_data
+            .move_to((a.x(), a.y()))
+            .line_to((b.x(), b.y()));
+    }
+
+    let contour_path = svg::node::element::Path::new()
+        .set("stroke", "red")
+        .set("stroke-width", "0.5")
+        .set("d", contour_data);
+
+    let svg = svg::Document::new()
+        .add(mesh_path)
+        .add(contour_path);
+
+    let svg_path = format!("debug\\svg\\test.svg");
+    svg::save(svg_path, &svg).unwrap();
+
     Ok(())
 }
 
 pub fn template_mesh_2d_contour() -> std::io::Result<()> {
-    // let stl_paths = vec![
-    //     r#"C:\OneDrive\Code\Bachelor\models\stl\LINK SP-CL 3D\177-200_26.stl"#,
-    //     r#"C:\OneDrive\Code\Bachelor\models\stl\LINK SP-CL 3D\177-201_26.stl"#,
-    //     r#"C:\OneDrive\Code\Bachelor\models\stl\LINK SP-CL 3D\177-202_26.stl"#,
-    //     r#"C:\OneDrive\Code\Bachelor\models\stl\LINK SP-CL 3D\177-203_26.stl"#,
-    //     r#"C:\OneDrive\Code\Bachelor\models\stl\LINK SP-CL 3D\177-204_26.stl"#,
-    // ];
-
     let stl_paths = vec![
-        // r#"C:\OneDrive\Code\Bachelor\simple_bunny.stl"#,
-        // r#"C:\OneDrive\Code\Bachelor\simple_teapod_82.stl"#,
-        r#"C:\OneDrive\Code\Bachelor\Stanford_Bunny_sample.stl"#,
-        r#"C:\OneDrive\Code\Bachelor\Utah_teapot_(solid).stl"#,
+        r#"C:\OneDrive\Code\Bachelor\177-204_26_0.stl"#,
+        r#"C:\OneDrive\Code\Bachelor\177-204_26_45.stl"#,
+        r#"C:\OneDrive\Code\Bachelor\177-204_26_90.stl"#
     ];
 
     for (index, stl_path) in stl_paths.iter().enumerate() {
@@ -426,7 +449,13 @@ pub fn template_mesh_2d_contour() -> std::io::Result<()> {
         mesh.add_mut(bounds.start().neg());
         mesh.vmul_mut(scale);
 
-        let contour = mesh.rrcontour(50_000).unwrap();
+        let now = std::time::Instant::now();
+
+        let contour = mesh.rrcontour(1000).unwrap();
+
+        let elapsed = now.elapsed();
+    
+        println!("elapsed: {:?}", elapsed);
 
         let segments = mesh.segments().iter().map(|iseg| mesh.point_segment(iseg));
         let mesh_path = draw_segments_to_path(segments)
@@ -446,14 +475,14 @@ pub fn template_mesh_2d_contour() -> std::io::Result<()> {
 
         let contour_path = svg::node::element::Path::new()
             .set("stroke", "red")
-            .set("stroke-width", "2")
+            .set("stroke-width", "1.5")
             .set("d", contour_data);
 
         let svg = svg::Document::new()
             .add(mesh_path)
             .add(contour_path);
 
-        let svg_path = format!("template_contours\\{}.svg", index);
+        let svg_path = format!("debug\\svg\\{}.svg", index);
         svg::save(svg_path, &svg).unwrap();
     }
 
