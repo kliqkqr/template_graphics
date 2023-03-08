@@ -30,6 +30,10 @@ pub trait Integer : Copy + HAdd + HSub + HMul + HDiv + HRem + HNeg {
 pub trait Float : Copy + Zero + One + Two + HAdd + HSub + HMul + HDiv + HRem + HNeg {
     fn sqrt(self) -> Self;
 
+    fn sin(self) -> Self;
+
+    fn cos(self) -> Self;
+
     fn acos(self) -> Self;
 
     fn pi() -> Self;
@@ -184,6 +188,14 @@ impl Float for f32 {
         f32::sqrt(self)
     }
 
+    fn sin(self) -> Self {
+        f32::sin(self)
+    }
+
+    fn cos(self) -> Self {
+        f32::cos(self)
+    }
+
     fn acos(self) -> Self {
         f32::acos(self)
     }
@@ -196,6 +208,14 @@ impl Float for f32 {
 impl Float for f64 {
     fn sqrt(self) -> f64 {
         f64::sqrt(self)
+    }
+
+    fn sin(self) -> Self {
+        f64::sin(self)
+    }
+
+    fn cos(self) -> Self {
+        f64::cos(self)
     }
 
     fn acos(self) -> Self {
