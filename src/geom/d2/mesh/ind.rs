@@ -706,75 +706,75 @@ impl<Vect : Vector> IndSegMesh<Vect> {
     }
 
 
-    // pub fn rrrcontour(&self, max : usize)  -> Option<Vec<Vect::Own>>
-    // where Vect::Val : Float + HPOrd + std::fmt::Debug
-    // {   
-    //     // Result from vertices loop. Contains vertex with min x coordinate and it's index
-    //     let mut first_result_option = None;
+    pub fn rrrcontour(&self, max : usize)  -> Option<Vec<Vect::Own>>
+    where Vect::Val : Float + HPOrd + std::fmt::Debug
+    {   
+        // Result from vertices loop. Contains vertex with min x coordinate and it's index
+        let mut first_result_option = None;
 
-    //     // iterator over all vertices to find min x coordinate vertex
-    //     for (vertex_index, vertex) in self.vertices().iter().enumerate() {
-    //         first_result_option = match first_result_option {
-    //             None => Some((vertex_index, vertex)),
-    //             Some((best_vertex_index, best_vertex)) => {
-    //                 match best_vertex.x() <= vertex.x() {
-    //                     false => Some((vertex_index, vertex)),
-    //                     true  => Some((best_vertex_index, best_vertex))
-    //                 }
-    //             }
-    //         }
-    //     }
+        // iterator over all vertices to find min x coordinate vertex
+        for (vertex_index, vertex) in self.vertices().iter().enumerate() {
+            first_result_option = match first_result_option {
+                None => Some((vertex_index, vertex)),
+                Some((best_vertex_index, best_vertex)) => {
+                    match best_vertex.x() <= vertex.x() {
+                        false => Some((vertex_index, vertex)),
+                        true  => Some((best_vertex_index, best_vertex))
+                    }
+                }
+            }
+        }
 
-    //     // return None if mesh contains no vertices
-    //     let (first_vertex_index, first_vertex) = first_result_option?;
+        // return None if mesh contains no vertices
+        let (first_vertex_index, first_vertex) = first_result_option?;
 
-    //     // contains all important values for loop step
-    //     let mut step = RContourStep {
-    //         last_vertex           : first_vertex.add((-Vect::Val::one(), Vect::Val::one())),
-    //         current_vertex        : Vect::of(first_vertex),
-    //         current_vertex_origin : RCurrentVertexOrigin::Mesh{current_vertex_index : first_vertex_index}
-    //     };
+        // contains all important values for loop step
+        let mut step = RContourStep {
+            last_vertex           : first_vertex.add((-Vect::Val::one(), Vect::Val::one())),
+            current_vertex        : Vect::of(first_vertex),
+            current_vertex_origin : RCurrentVertexOrigin::Mesh{current_vertex_index : first_vertex_index}
+        };
 
-    //     // contour that is returned
-    //     let mut contour = vec![Vect::of(first_vertex)];
+        // contour that is returned
+        let mut contour = vec![Vect::of(first_vertex)];
 
-    //     // loop until last vertix is equal to first vertex
-    //     loop {  
-    //         // vector from current vertex to last vertex
-    //         let current_last_vector = step.last_vertex.sub(&step.current_vertex);
+        // // loop until last vertix is equal to first vertex
+        // loop {  
+        //     // vector from current vertex to last vertex
+        //     let current_last_vector = step.last_vertex.sub(&step.current_vertex);
 
-    //         let adjacent_vertex_index = match step.current_vertex_origin {
-    //             RCurrentVertexOrigin::Mesh{current_vertex_index} => {
-    //                 let adjacent_result_option = None;
+        //     let adjacent_vertex_index = match step.current_vertex_origin {
+        //         RCurrentVertexOrigin::Mesh{current_vertex_index} => {
+        //             let adjacent_result_option = None;
 
-    //                 for adjacent_vertex_index in self.adjacent_vertex_indecis(current_vertex_index) {
+        //             for adjacent_vertex_index in self.adjacent_vertex_indecis(current_vertex_index) {
                         
-    //                 }
-    //             },
-    //             RCurrentVertexOrigin::Intersection{} => {
-    //                 todo!()
-    //             }
-    //         };
+        //             }
+        //         },
+        //         RCurrentVertexOrigin::Intersection{} => {
+        //             todo!()
+        //         }
+        //     };
 
-    //         // // index of adjacent vertex
-    //         // let adjacent_index = match step.origin {
-    //         //     ContourStepOrigin::Mesh{current_index} => {
-    //         //         // result from adjacent vertex loop
-    //         //         let mut adjacent_result_option = None;
+        //     // // index of adjacent vertex
+        //     // let adjacent_index = match step.origin {
+        //     //     ContourStepOrigin::Mesh{current_index} => {
+        //     //         // result from adjacent vertex loop
+        //     //         let mut adjacent_result_option = None;
 
-    //         //         // iterate over all adjacent vertices to current vertex 
-    //         //         for adjacent_vertex_index in self.adjacent_vertex_indecis(current_index) {
+        //     //         // iterate over all adjacent vertices to current vertex 
+        //     //         for adjacent_vertex_index in self.adjacent_vertex_indecis(current_index) {
 
-    //         //         }
-    //         //     },
-    //         //     ContourStepOrigin::Intersection{..} => {
-    //         //         todo!()
-    //         //     }
-    //         // };
-    //     }
+        //     //         }
+        //     //     },
+        //     //     ContourStepOrigin::Intersection{..} => {
+        //     //         todo!()
+        //     //     }
+        //     // };
+        // }
 
-    //     Some(contour)
-    // }
+        Some(contour)
+    }
 
     #[warn(deprecated)]
     pub fn deduplicate(&self) -> IndSegMesh<Vect::Own> 
@@ -813,7 +813,7 @@ impl<Vect : Vector> IndSegMesh<Vect> {
         }
 
         IndSegMesh::new_unchecked(vertices, segments)
-    }
+    }    
 }
 
 impl<Vect : Vector<Own = Vect>> IndSegMesh<Vect> {
