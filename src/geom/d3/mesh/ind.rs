@@ -2,7 +2,6 @@ use std::vec::{
     Vec 
 };
 
-
 use crate::file::stl::{
     Stl 
 };
@@ -18,6 +17,10 @@ use crate::geom::d3::prim::vect::{
 
 use crate::geom::mesh::ind::{
     IndSeg 
+};
+
+use crate::num::{
+    Float
 };
 
 pub struct IndSegMesh<Vect : Vector> {
@@ -82,6 +85,15 @@ impl IndSegMesh<Vect<f32>> {
 }
 
 impl<Vect : Vector> IndSegMesh<Vect> {
+    pub fn rotate_z(&self, angle : Vect::Val) -> IndSegMesh<Vect::Own> 
+    where Vect::Val : Float
+    {   
+        let vertices = self.vertices().iter().map(|vertex| vertex.rotate_z(angle)).collect();
+        let segments = self.segments().clone();
+
+        IndSegMesh::new_unchecked(vertices, segments)
+    }
+
     pub fn proj_2d<V : d2::prim::Vector, Func : Fn(&Vect) -> V>(&self, proj : Func) -> d2::mesh::ind::IndSegMesh<V> {
         let vertices = self.vertices.iter().map(|vertex| proj(vertex)).collect();
         let segments = self.segments.clone();
@@ -89,3 +101,4 @@ impl<Vect : Vector> IndSegMesh<Vect> {
         d2::mesh::ind::IndSegMesh::new_unchecked(vertices, segments)
     }
 }
+

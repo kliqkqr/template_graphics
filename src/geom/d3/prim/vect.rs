@@ -2,6 +2,10 @@ use std::marker::{
     Copy 
 };
 
+use crate::num::{
+    Float 
+};
+
 use crate::rel::{
     HPEq 
 };
@@ -31,6 +35,19 @@ pub trait Vector {
     where Self::Val : HPEq
     {
         self.x() == other.x() && self.y() == other.y() && self.z() == other.z()
+    }
+
+    fn rotate_z(&self, angle : Self::Val) -> Self::Own 
+    where Self::Val : Float
+    {
+        let sin = angle.sin();
+        let cos = angle.cos();
+
+        let x = self.x() * cos - self.y() * sin;
+        let y = self.x() * sin + self.y() * cos;
+        let z = self.z();
+
+        Self::of((x, y, z))
     }
 }
 
