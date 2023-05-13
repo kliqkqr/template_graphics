@@ -12,3 +12,8 @@ image = "0.24.5"
 rand = "*"
 itertools = "0.10.5"
 svg = "0.13.0"
+libc = "0.2.139"
+
+[lib]
+name = "tg"
+crate-type = ["cdylib"]

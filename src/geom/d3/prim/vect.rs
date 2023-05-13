@@ -37,6 +37,19 @@ pub trait Vector {
         self.x() == other.x() && self.y() == other.y() && self.z() == other.z()
     }
 
+    fn rotate_y(&self, angle : Self::Val) -> Self::Own 
+    where Self::Val : Float
+    {
+        let sin = angle.sin();
+        let cos = angle.cos();
+
+        let x =  self.x() * cos + self.z() * sin;
+        let y =  self.y();
+        let z = -self.x() * sin + self.z() * cos;
+
+        Self::of((x, y, z))
+    }
+
     fn rotate_z(&self, angle : Self::Val) -> Self::Own 
     where Self::Val : Float
     {

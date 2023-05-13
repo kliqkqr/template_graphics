@@ -94,6 +94,15 @@ impl<Vect : Vector> IndSegMesh<Vect> {
         IndSegMesh::new_unchecked(vertices, segments)
     }
 
+    pub fn rotate_y(&self, angle : Vect::Val) -> IndSegMesh<Vect::Own> 
+    where Vect::Val : Float 
+    {
+        let vertices = self.vertices().iter().map(|vertex| vertex.rotate_y(angle)).collect();
+        let segments = self.segments().clone();
+
+        IndSegMesh::new_unchecked(vertices, segments)
+    }
+
     pub fn proj_2d<V : d2::prim::Vector, Func : Fn(&Vect) -> V>(&self, proj : Func) -> d2::mesh::ind::IndSegMesh<V> {
         let vertices = self.vertices.iter().map(|vertex| proj(vertex)).collect();
         let segments = self.segments.clone();

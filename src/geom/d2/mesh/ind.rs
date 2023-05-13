@@ -389,7 +389,7 @@ impl<Vect : Vector> IndSegMesh<Vect> {
         // loop until last found vertix is first vertex
         loop {
             // Remove: Debug
-            println!("search = {}", contour.len());
+            // println!("search = {}", contour.len());
             let mut geogebra_commands = Vec::new();
             let mut geogebra_adjacent_vertices = Vec::new();
             let mut geogebra_adjacent_segments = Vec::new();
@@ -688,8 +688,8 @@ impl<Vect : Vector> IndSegMesh<Vect> {
                 }
             }
 
-            // Remove: Debug
-            println!("Execute[{{{}}}]\n\n", geogebra_commands.iter().map(|cmd| format!("\"{}\"", cmd)).collect::<Vec<String>>().join(", "));
+            // // Remove: Debug
+            // println!("Execute[{{{}}}]\n\n", geogebra_commands.iter().map(|cmd| format!("\"{}\"", cmd)).collect::<Vec<String>>().join(", "));
 
             if contour[0].equal(&step.current_vertex) {
                 break;
@@ -704,7 +704,6 @@ impl<Vect : Vector> IndSegMesh<Vect> {
 
         Some(contour)
     }
-
 
     pub fn rrrcontour(&self, max : usize)  -> Option<Vec<Vect::Own>>
     where Vect::Val : Float + HPOrd + std::fmt::Debug
